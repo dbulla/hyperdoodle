@@ -1,6 +1,8 @@
 package com.nurflugel.hyperdoodle
 
-import java.awt.Point
+import com.nurflugel.hyperdoodle.HyperDoodlePanel.Companion.DRAW_POINTS
+import com.nurflugel.hyperdoodle.HyperDoodlePanel.Companion.DRAW_POINT_COORDINATES
+import java.awt.Graphics2D
 import java.lang.StrictMath.PI
 
 /** Representation of the spine of the doodle.  */
@@ -24,13 +26,16 @@ class Spine
         val deltaLength = length / numPointsPerSide
         points = arrayOfNulls(numPointsPerSide + 1)
 
-        for (i in 0..numPointsPerSide) {
-            val x = center.getX() + (deltaLength * i * StrictMath.cos(angleInDegrees))
-            val y = center.getY() + (deltaLength * i * StrictMath.sin(angleInDegrees))
+        (0..numPointsPerSide).forEach { i ->
+            val x = center.x + (deltaLength * i * StrictMath.cos(angleInDegrees))
+            val y = center.y + (deltaLength * i * StrictMath.sin(angleInDegrees))
 
-            points[i] = Point(x.toInt(), y.toInt())
-
-            // System.out.println("points[i] = " + points[i]);
+            points[i] = Point(x, y)
         }
+    }
+
+
+    fun getLine(): Line {
+        return Line(points[0]!!, points[points.size - 1]!!)
     }
 }

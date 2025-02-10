@@ -7,7 +7,6 @@ package com.nurflugel.hyperdoodle
 
 import java.awt.BorderLayout
 import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.print.PrinterJob
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -97,8 +96,8 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
         val doodlePanel = doodleFrame.hyperDoodlePanel
         doodlePanel.setNumberOfSpines(numberOfSpines)
-        doodlePanel.numPointsPerSpine = numberOfPoints
-        doodlePanel.initializePoints(angle)
+        doodlePanel.numSegmentsPerSpine = numberOfPoints
+        doodlePanel.initializePoints(angle.toDouble())
 
         doodlePanel.invalidate()
         doodlePanel.repaint()
