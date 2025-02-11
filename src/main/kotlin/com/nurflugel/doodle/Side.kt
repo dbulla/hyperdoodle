@@ -1,6 +1,7 @@
 package com.nurflugel.doodle
 
-import java.awt.Point
+import com.nurflugel.hyperdoodle.Point
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,8 +22,8 @@ class Side
     private val numPointsPerSide: Int
 
     init {
-        val deltaX = endPoint.getX() - startPoint.getX()
-        val deltaY = endPoint.getY() - startPoint.getY()
+        val deltaX = endPoint.x - startPoint.x
+        val deltaY = endPoint.y - startPoint.y
 
         //		segmentLength = (float) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
         this.numPointsPerSide = numPointsPerSide
@@ -34,9 +35,9 @@ class Side
         var y: Double
 
         for (i in 0..<(numPointsPerSide - 1)) {
-            x = startPoint.getX() + (xIncrement * i.toDouble())
-            y = startPoint.getY() + (yIncrement * i.toDouble())
-            points[i] = Point(x.toInt(), y.toInt())
+            x = startPoint.x + (xIncrement * i.toDouble())
+            y = startPoint.y + (yIncrement * i.toDouble())
+            points[i] = Point(x, y)
         }
     }
 }

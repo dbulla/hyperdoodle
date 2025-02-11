@@ -8,8 +8,11 @@ import java.awt.event.MouseWheelEvent
 import java.awt.print.PrinterJob
 import javax.swing.*
 import javax.swing.border.EtchedBorder
-import javax.swing.event.ChangeEvent
 
+
+private const val MIN_POINTS_VALUE = 2
+private const val MAX_POINTS_VALUE = 200
+private const val INITIAL_POINTS_VALUE = 40
 
 /**
  * @author Douglas Bullard
@@ -58,100 +61,94 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         fixedWanderButtonGroup = ButtonGroup()
 
         if (!useUIManager) {
-            var gridBagConstraints: GridBagConstraints
 
+            clearButton = JButton("Clear")
+            printButton = JButton("Print")
+            quitButton = JButton("Quit")
+            layout = GridBagLayout()
 
-            if (true) {
-                clearButton = JButton("Clear")
-                printButton = JButton("Print")
-                quitButton = JButton("Quit")
-                layout = GridBagLayout()
+            clearButton.text = "Clear"
+            printButton.text = "Print"
+            quitButton.text = "Quit"
+            radioButtonPanel = JPanel()
+            fixedWanderModePanel = JPanel()
+            addLocusPointsRadioButton = JRadioButton("Add Points")
+            moveLocusPointsRadioButton = JRadioButton("Move Points")
+            removeLocusPointsRadioButton = JRadioButton("Remove Points")
+            wanderModeRadioButton = JRadioButton("Wander Mode")
+            fixedModeRadioButton = JRadioButton("Fixed Mode")
+            numPointsSpinner = JSpinner(SpinnerNumberModel(INITIAL_POINTS_VALUE, MIN_POINTS_VALUE, MAX_POINTS_VALUE, 1))
+            numberOfEdgePointsLabel = JLabel()
+            contentPanel = JPanel()
 
-                clearButton.text = "Clear"
-                printButton.text = "Print"
-                quitButton.text = "Quit"
-                radioButtonPanel = JPanel()
-                fixedWanderModePanel = JPanel()
-                addLocusPointsRadioButton = JRadioButton("Add Points")
-                moveLocusPointsRadioButton = JRadioButton("Move Points")
-                removeLocusPointsRadioButton = JRadioButton("Remove Points")
-                wanderModeRadioButton = JRadioButton("Wander Mode")
-                fixedModeRadioButton = JRadioButton("Fixed Mode")
-                val spinnerModel:SpinnerModel = SpinnerNumberModel(10,2,40,1)
-                numPointsSpinner = JSpinner(spinnerModel)
-                numberOfEdgePointsLabel = JLabel()
-                contentPanel = JPanel()
+            var gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridy = 1
+            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            add(clearButton, gridBagConstraints)
 
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 2
-                gridBagConstraints.gridy = 1
-                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
-                add(clearButton, gridBagConstraints)
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridy = MIN_POINTS_VALUE
+            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            add(printButton, gridBagConstraints)
 
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 2
-                gridBagConstraints.gridy = 2
-                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
-                add(printButton, gridBagConstraints)
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridy = 3
+            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            add(quitButton, gridBagConstraints)
 
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 2
-                gridBagConstraints.gridy = 3
-                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
-                add(quitButton, gridBagConstraints)
+            radioButtonPanel.layout = GridLayout(3, 1)
 
-                radioButtonPanel.layout = GridLayout(3, 1)
+            radioButtonPanel.border = EtchedBorder()
+            addLocusPointsRadioButton.isSelected = true
+            addLocusPointsRadioButton.text = "Add New Locus Points"
+            moveLocusPointsRadioButton.text = "Move Locus Points"
+            removeLocusPointsRadioButton.text = "Remove Locus Points"
 
-                radioButtonPanel.border = EtchedBorder()
-                addLocusPointsRadioButton.isSelected = true
-                addLocusPointsRadioButton.text = "Add New Locus Points"
-                moveLocusPointsRadioButton.text = "Move Locus Points"
+            radioButtonPanel.add(addLocusPointsRadioButton)
+            radioButtonPanel.add(moveLocusPointsRadioButton)
+            radioButtonPanel.add(removeLocusPointsRadioButton)
 
-                removeLocusPointsRadioButton.text = "Remove Locus Points"
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = 0
+            gridBagConstraints.gridy = 0
+            gridBagConstraints.gridwidth = MIN_POINTS_VALUE
+            gridBagConstraints.gridheight = MIN_POINTS_VALUE
+            add(radioButtonPanel, gridBagConstraints)
 
-                radioButtonPanel.add(addLocusPointsRadioButton)
-                radioButtonPanel.add(moveLocusPointsRadioButton)
-                radioButtonPanel.add(removeLocusPointsRadioButton)
+            fixedWanderModePanel.layout = BoxLayout(fixedWanderModePanel, BoxLayout.Y_AXIS)
+            fixedWanderModePanel.border = EtchedBorder()
 
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 0
-                gridBagConstraints.gridy = 0
-                gridBagConstraints.gridwidth = 2
-                gridBagConstraints.gridheight = 2
-                add(radioButtonPanel, gridBagConstraints)
+            wanderModeRadioButton.text = "Wander mode"
+            fixedModeRadioButton.text = "Fixed mode"
 
-                fixedWanderModePanel.layout = BoxLayout(fixedWanderModePanel, BoxLayout.Y_AXIS)
-                fixedWanderModePanel.border = EtchedBorder()
+            fixedModeRadioButton.isSelected = true
 
-                wanderModeRadioButton.text = "Wander mode"
-                fixedModeRadioButton.text = "Fixed mode"
+            fixedWanderModePanel.add(fixedModeRadioButton)
+            fixedWanderModePanel.add(wanderModeRadioButton)
 
-                fixedModeRadioButton.isSelected = true
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridy = 0
+            gridBagConstraints.anchor = GridBagConstraints.NORTH
+            add(fixedWanderModePanel, gridBagConstraints)
 
-                fixedWanderModePanel.add(wanderModeRadioButton)
-                fixedWanderModePanel.add(fixedModeRadioButton)
+            numPointsSpinner.toolTipText = "Controls how many points per side"
 
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 2
-                gridBagConstraints.gridy = 0
-                gridBagConstraints.anchor = GridBagConstraints.NORTH
-                add(fixedWanderModePanel, gridBagConstraints)
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = 1
+            gridBagConstraints.gridy = MIN_POINTS_VALUE
+            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            gridBagConstraints.ipadx = 12
+            add(numPointsSpinner, gridBagConstraints)
 
-                numPointsSpinner.toolTipText = "Controls how many points per side"
-
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 1
-                gridBagConstraints.gridy = 2
-                gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
-                gridBagConstraints.ipadx = 12
-                add(numPointsSpinner, gridBagConstraints)
-
-                numberOfEdgePointsLabel.text = "Number of Edge Points: "
-                gridBagConstraints = GridBagConstraints()
-                gridBagConstraints.gridx = 0
-                gridBagConstraints.gridy = 2
-                add(numberOfEdgePointsLabel, gridBagConstraints)
-            }
+            numberOfEdgePointsLabel.text = "Number of Edge Points: "
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = 0
+            gridBagConstraints.gridy = MIN_POINTS_VALUE
+            add(numberOfEdgePointsLabel, gridBagConstraints)
         }
         addMoveRemoteButtonGroup.add(addLocusPointsRadioButton)
         addMoveRemoteButtonGroup.add(moveLocusPointsRadioButton)
@@ -160,36 +157,34 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         fixedWanderButtonGroup.add(fixedModeRadioButton)
         fixedWanderButtonGroup.add(wanderModeRadioButton)
 
-        clearButton.addActionListener { clearButtonActionPerformed() }
-        quitButton.addActionListener { quitButtonActionPerformed() }
-        moveLocusPointsRadioButton.addActionListener { moveLocusPointsRadioButtonActionPerformed() }
-
-        removeLocusPointsRadioButton.addActionListener { removeLocusPointsRadioButtonActionPerformed() }
-        wanderModeRadioButton.addActionListener { wanderModeRadioButtonActionPerformed() }
-        fixedModeRadioButton.addActionListener { fixedModeRadioButtonActionPerformed() }
-        numPointsSpinner.addChangeListener { numPointsSpinnerStateChanged(it) }
+        clearButton.addActionListener { doodleFrame.clear() }
+        quitButton.addActionListener { System.exit(0) }
+//        moveLocusPointsRadioButton.addActionListener { moveLocusPointsRadioButtonActionPerformed() }
+//        removeLocusPointsRadioButton.addActionListener { removeLocusPointsRadioButtonActionPerformed() }
+        wanderModeRadioButton.addActionListener { doodleFrame.animate() }
+        fixedModeRadioButton.addActionListener { doodleFrame.stop() }
+        numPointsSpinner.addChangeListener { doodleFrame.setNumPointsPerSide(numPointsSpinner.model.value.toString().toInt()) }
         numPointsSpinner.addMouseWheelListener { numPointsSpinnerMouseWheelMoved(it) }
-        printButton.addActionListener { e ->
-            if (e.source is JButton) {
-                val printJob = PrinterJob.getPrinterJob()
+        printButton.addActionListener { printScreen() }
+    }
 
-                printJob.setPrintable(doodleFrame.getDoodlePanel())
+    private fun printScreen() {
+        val printJob = PrinterJob.getPrinterJob()
 
-                if (printJob.printDialog()) {
-                    try {
-                        isPrinting = true
-                        printJob.print()
-                        isPrinting = false
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
+        printJob.setPrintable(doodleFrame.getDoodlePanel())
+
+        if (printJob.printDialog()) {
+            try {
+                isPrinting = true
+                printJob.print()
+                isPrinting = false
+            } catch (ex: Exception) {
+                ex.printStackTrace()
             }
         }
     }
 
-    //GEN-END:initComponents
-    private fun numPointsSpinnerMouseWheelMoved(e: MouseWheelEvent) {    //GEN-FIRST:event_numPointsSpinnerMouseWheelMoved
+    private fun numPointsSpinnerMouseWheelMoved(e: MouseWheelEvent) {
 
         val scrollAmount = e.scrollAmount
         val scrollType = e.scrollType
@@ -206,52 +201,22 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         println("wheelRotation = " + (value + wheelRotation))
         println("scrollAmount = $scrollAmount")
         println("value = $value")
-        if (value in 2..100) {
+        if (value in MIN_POINTS_VALUE..MAX_POINTS_VALUE) {
             numPointsSpinner.value = value + wheelRotation
             doodleFrame.setNumPointsPerSide(wheelRotation)
         }
     }
 
-    //GEN-LAST:event_numPointsSpinnerMouseWheelMoved
-    private fun numPointsSpinnerStateChanged(evt: ChangeEvent) {    //GEN-FIRST:event_numPointsSpinnerStateChanged
-
-        if (evt.source == numPointsSpinner) {
-            doodleFrame.setNumPointsPerSide(numPointsSpinner.model.value.toString().toInt())
-        }
-    }
-
-    //GEN-LAST:event_numPointsSpinnerStateChanged
-    private fun quitButtonActionPerformed() {    //GEN-FIRST:event_quitButtonActionPerformed
-        System.exit(0)
-    }
-
-    //GEN-LAST:event_quitButtonActionPerformed
-    private fun clearButtonActionPerformed() {    //GEN-FIRST:event_clearButtonActionPerformed
-        clear()
-    }
-
-    private fun clear() {
-        doodleFrame.clear()
-    }
-
-    private fun wanderModeRadioButtonActionPerformed() {
-        doodleFrame.animate()
-    }
-
-    private fun fixedModeRadioButtonActionPerformed() {
-        doodleFrame.stop()
-    }
-
     val isWandering: Boolean
         get() = wanderModeRadioButton.isSelected
 
-    private fun removeLocusPointsRadioButtonActionPerformed() {
-        // Add your handling code here:
-    }
-
-    private fun moveLocusPointsRadioButtonActionPerformed() {
-        // Add your handling code here:
-    }
+//    private fun removeLocusPointsRadioButtonActionPerformed() {
+//        // Add your handling code here:
+//    }
+//
+//    private fun moveLocusPointsRadioButtonActionPerformed() {
+//        // Add your handling code here:
+//    }
 
     val isAddLocusMode: Boolean
         get() = addLocusPointsRadioButton.isSelected

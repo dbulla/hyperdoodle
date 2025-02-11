@@ -1,6 +1,11 @@
 package com.nurflugel.doodle
 
-import java.awt.*
+import com.nurflugel.hyperdoodle.Point
+import java.awt.Color
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.Rectangle
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -45,7 +50,6 @@ class RectangularDoodlePanel(theFrame: DoodleFrame) : DoodlePanel(true, theFrame
 
         drawBounds(g)
 
-        //drawInterior(g);
         (0..<locusList.size).forEach { i ->
             locus = locusList[i]
             drawInnerStuffForLocus(g, locus)
@@ -80,18 +84,7 @@ class RectangularDoodlePanel(theFrame: DoodleFrame) : DoodlePanel(true, theFrame
         graphics2D.fill(rectangle)
     }
 
-    protected fun drawInterior(g: Graphics) {
-        g.setPaintMode()
-
-        val graphics2D = g as Graphics2D
-        val rectangle = Rectangle(XOFFSET, YOFFSET, doodleWidth, doodleHeight)
-
-        graphics2D.color = background
-        graphics2D.fill(rectangle)
-    }
-
     private fun drawBounds(g: Graphics): Graphics2D {
-        //		System.out.println("RectangularDoodlePanel.drawBounds");
         val graphics2D = g as Graphics2D
         var rectangle = Rectangle(0, 0, doodleWidth + (2 * XOFFSET), doodleHeight + (2 * YOFFSET))
 
@@ -108,12 +101,10 @@ class RectangularDoodlePanel(theFrame: DoodleFrame) : DoodlePanel(true, theFrame
     }
 
     override fun getBackground(): Color {
-        val background = if (!isPrinting) {
-//            super.getBackground()
-            Color.white
-        }
-        else {
-            Color.white
+        val background = when {
+            super.getBackground() == null -> Color.white
+            !isPrinting                   -> super.getBackground()
+            else                          -> Color.white
         }
 
         return background
@@ -121,7 +112,7 @@ class RectangularDoodlePanel(theFrame: DoodleFrame) : DoodlePanel(true, theFrame
 
     companion object {
         private const val NUM_SIDES = 4
-        const val XOFFSET: Int = 10
-        const val YOFFSET: Int = 10
+        const val XOFFSET = 10
+        const val YOFFSET = 10
     }
 }

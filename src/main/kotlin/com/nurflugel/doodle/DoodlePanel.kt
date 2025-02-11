@@ -1,6 +1,10 @@
 package com.nurflugel.doodle
 
-import java.awt.*
+import com.nurflugel.hyperdoodle.Point
+import java.awt.Color
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import java.awt.event.MouseEvent
@@ -11,8 +15,6 @@ import java.awt.print.PageFormat
 import java.awt.print.Printable
 import java.awt.print.PrinterException
 import javax.swing.JPanel
-
-//import javax.swing.SwingWorker
 
 /** Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 10:39:06 PM To change this template use Options | File Templates.  */
 abstract class DoodlePanel protected constructor(
@@ -33,20 +35,17 @@ abstract class DoodlePanel protected constructor(
         addMouseMotionListener(this)
     }
 
-    private fun instantiateWorker() {
+    fun wander() {
         worker = object : SwingWorker() {
             override fun construct(): Any {
-                var locus: Locus? = null
-                val width = width
-                val height = height
                 val locusListSize: Int = locusList.size
 
                 // System.out.println("About to start wandering locus list");
                 while (theFrame.isWandering) {
-                    for (i in 0..<locusListSize) {
-                        locus = locusList[i]
-                        locus.wander(width.toDouble(), height.toDouble())
-                    }
+                    val screenWidth = width.toDouble()
+                    val screenHeight = height.toDouble()
+                    val screenCenter = Point((screenWidth / 2.0), (screenHeight / 2.0))
+                    (0..<locusListSize).forEach { locusList[it].wander(screenWidth, screenHeight, screenCenter) }
 
                     repaint()
                 }
@@ -54,13 +53,6 @@ abstract class DoodlePanel protected constructor(
                 return "Success" // return value not used by this program
             }
         }
-    }
-
-    fun wander() {
-        // System.out.println("DoodlePanel.wander");
-        // System.out.println("About to start worker");
-
-        instantiateWorker()
         worker.start()
     }
 
@@ -101,10 +93,10 @@ abstract class DoodlePanel protected constructor(
         var i = 0
         while (i < numPoints) {
             val path = GeneralPath()
-            path.moveTo(locus.x.toFloat(), locus.y.toFloat())
+            path.moveTo(locus.x.toDouble(), locus.y.toDouble())
 
             var point = points[i]
-            path.lineTo(point!!.getX().toFloat(), point.getY().toFloat())
+            path.lineTo(point!!.x.toFloat(), point.y.toFloat())
 
             point = if (i == (numPoints - 1)) {
                 points[0]
@@ -113,7 +105,7 @@ abstract class DoodlePanel protected constructor(
                 points[i + 1]
             }
 
-            path.lineTo(point!!.getX().toFloat(), point.getY().toFloat())
+            path.lineTo(point!!.x.toFloat(), point.y.toFloat())
             path.closePath()
             graphics2D.setXORMode(backgroundColor)
             graphics2D.fill(path)
@@ -141,13 +133,10 @@ abstract class DoodlePanel protected constructor(
             return points
         }
 
-    // protected abstract Graphics2D drawBounds(Graphics g);
     /** Invoked when the mouse button has been clicked (pressed and released) on a component.  */
     override fun mouseClicked(e: MouseEvent) {
-        val addLocusMode = theFrame.isAddLocusMode
 
-        if (addLocusMode) { // System.out.println("DoodlePanel.mouseClicked");
-
+        if (theFrame.isAddLocusMode) {
             val point = e.point
             val newLocus: Locus = Locus((point.getX().toInt()), (point.getY().toInt()))
 
@@ -159,14 +148,7 @@ abstract class DoodlePanel protected constructor(
             val numLocusPoints: Int = locusList.size
 
             for (i in 0..<numLocusPoints) {
-                val locusPoint: Locus = locusList[i]
-
-                val deltaX = (locusPoint.x - x).toDouble()
-                val deltaY = (locusPoint.y - y).toDouble()
-
-                if (((deltaX * deltaX) + (deltaY * deltaY)) < MIN_LOCUS_DISTANCE) {
-                    selectedLocus = locusPoint
-                }
+                determineSelectedLocusPoint(i, x, y)
             }
         }
 
@@ -204,8 +186,8 @@ abstract class DoodlePanel protected constructor(
         repaint()
     }
 
-//    private val locusPoints: MutableList<Locus>
-//        get() = locusList
+    //    private val locusPoints: MutableList<Locus>
+    //        get() = locusList
 
     /**
      * Invoked when a mouse button is pressed on a component and then dragged. `MOUSE_DRAGGED` events will continue to be delivered to the
@@ -217,57 +199,44 @@ abstract class DoodlePanel protected constructor(
      * operation.
      */
     override fun mouseDragged(e: MouseEvent) {
-        val moveLocusMode = theFrame.isMoveLocusMode
-
-        // System.out.println("moveLocusMode = " + moveLocusMode);
-        if (moveLocusMode) {
+        if (theFrame.isMoveLocusMode) {
             val x = e.x
             val y = e.y
-//            val locusPoints: LocusList = locusPoints
-            val numLocusPoints: Int = locusList.size
 
-            for (i in 0..<numLocusPoints) {
-                val locusPoint: Locus = locusList[i]
-
-                val deltaX = (locusPoint.x - x).toDouble()
-                val deltaY = (locusPoint.y - y).toDouble()
-
-                if (((deltaX * deltaX) + (deltaY * deltaY)) < MIN_LOCUS_DISTANCE) {
-                    selectedLocus = locusPoint
-                }
-
-                val selectedLocus1 = getSelectedLocus()
-                if (selectedLocus1 != null) {
-                    selectedLocus1.setLocation(x, y)
-                    repaint()
-
-                    break
-                }
+            for (i in 0..<locusList.size) {
+                determineSelectedLocusPoint(i, x, y)
+                selectedLocus!!.setLocation(x, y)
+                repaint()
+                break
             }
+        }
+    }
+
+    private fun determineSelectedLocusPoint(i: Int, x: Int, y: Int) {
+        val locusPoint: Locus = locusList[i]
+
+        val deltaX = (locusPoint.x - x).toDouble()
+        val deltaY = (locusPoint.y - y).toDouble()
+
+        if (((deltaX * deltaX) + (deltaY * deltaY)) < MIN_LOCUS_DISTANCE) {
+            selectedLocus = locusPoint
         }
     }
 
     /** Invoked when the mouse cursor has been moved onto a component but no buttons have been pushed.  */
     override fun mouseMoved(e: MouseEvent) {
-        val moveLocusMode = theFrame.isMoveLocusMode
-
-        // System.out.println("moveLocusMode = " + moveLocusMode);
-        if (moveLocusMode)  // if (true)
-        {
+        if (theFrame.isMoveLocusMode) {
             val x = e.x
             val y = e.y
-            val numLocusPoints: Int = locusList.size
 
             selectedLocus = null
 
-            for (i in 0..<numLocusPoints) { // System.out.println("i = " + i);
-
+            for (i in 0..<locusList.size) {
                 val locusPoint: Locus = locusList[i]
-
                 val deltaX = (locusPoint.x - x).toDouble()
                 val deltaY = (locusPoint.y - y).toDouble()
 
-                if (((deltaX * deltaX) + (deltaY * deltaY)) < MIN_LOCUS_DISTANCE) { // locusPoint.setLocation(x, y);
+                if (((deltaX * deltaX) + (deltaY * deltaY)) < MIN_LOCUS_DISTANCE) {
                     selectedLocus = locusPoint
                     repaint()
 
@@ -281,12 +250,11 @@ abstract class DoodlePanel protected constructor(
         g: Graphics,
         locus: Locus,
     ) {
-        val moveLocusMode = theFrame.isMoveLocusMode
 
-        if (moveLocusMode) {
+        if (theFrame.isMoveLocusMode) {
             val theSelectedLocus: Locus? = getSelectedLocus()
 
-            if (locus.equals(theSelectedLocus)) {
+            if (locus == theSelectedLocus) {
                 g.setPaintMode()
 
                 val oldColor = g.color
@@ -310,7 +278,7 @@ abstract class DoodlePanel protected constructor(
     }
 
     companion object {
-        protected const val LOCUS_POINT_RADIUS: Int = 5
+        protected const val LOCUS_POINT_RADIUS: Int = 10
         protected const val MIN_LOCUS_DISTANCE: Int = 25
     }
 }
