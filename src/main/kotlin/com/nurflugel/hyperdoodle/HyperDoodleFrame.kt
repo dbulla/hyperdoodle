@@ -11,13 +11,13 @@ import javax.swing.JFrame
 import java.awt.print.Printable
 
 /** Main holding frame for the application.  */
-class DoodleFrame : JFrame() {
+class HyperDoodleFrame : JFrame() {
     var hyperDoodlePanel: HyperDoodlePanel
-    var controlPanel: ControlPanelUIManager
+    private var controlPanel: HyperDoodleControlPanelUIManager
     private var useFullScreenMode = false
 
     init {
-        val contentPane = getContentPane()
+//        val contentPane = contentPane
         val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
         val screen = graphicsEnvironment.defaultScreenDevice
         val isFullScreenSupported = screen.isFullScreenSupported
@@ -34,7 +34,7 @@ class DoodleFrame : JFrame() {
             }
 
             hyperDoodlePanel = HyperDoodlePanel(this)
-            controlPanel = ControlPanelUIManager(this)
+            controlPanel = HyperDoodleControlPanelUIManager(this)
             contentPane.layout = BorderLayout()
             contentPane.add(BorderLayout.CENTER, hyperDoodlePanel)
             contentPane.add(BorderLayout.EAST, controlPanel)
@@ -49,18 +49,16 @@ class DoodleFrame : JFrame() {
             })
 
             addKeyListener(object : KeyAdapter() {
-                override fun keyTyped(e: KeyEvent?) {
-                    super.keyTyped(e) // To change body of overridden methods use Options | File Templates.
+                override fun keyTyped(e: KeyEvent) {
+                    super.keyTyped(e)
                     println("DoodleFrame.keyTyped")
                 }
 
                 override fun keyPressed(e: KeyEvent) {
                     println("DoodlePanel.keyPressed")
-                    super.keyPressed(e) // To change body of overridden methods use Options | File Templates.
+                    super.keyPressed(e)
 
-                    val keyCode = e.getKeyCode()
-
-                    if (keyCode == KeyEvent.VK_ESCAPE) {
+                    if (e.keyCode == KeyEvent.VK_ESCAPE) {
                         invertControlPanelVisibility()
                     }
                 }
@@ -97,7 +95,7 @@ class DoodleFrame : JFrame() {
         @JvmStatic
         fun main(args: Array<String>) {
 
-            val doodleFrame = DoodleFrame()
+            val doodleFrame = HyperDoodleFrame()
             doodleFrame.isVisible = true
         }
     }

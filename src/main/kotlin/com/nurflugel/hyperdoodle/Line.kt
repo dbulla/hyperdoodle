@@ -1,16 +1,8 @@
 package com.nurflugel.hyperdoodle
 
 
-/**
- * Created by IntelliJ IDEA. User: douglasbullard Date: Dec 25, 2007 Time: 5:09:36 PM To change this template use File | Settings | File Templates.
- */
 class Line
-/**
- * m=(y1-y2)/(x1-x2) b=y-mx.
- *
- * @param  start
- * @param  end
- */
+/** m=(y1-y2)/(x1-x2) b=y-mx. */
 internal constructor(private val start: Point, private val end: Point) {
     private val m: Double = (start.y - end.y) / (start.x - end.x)
     private val b: Double = start.y - m * start.x

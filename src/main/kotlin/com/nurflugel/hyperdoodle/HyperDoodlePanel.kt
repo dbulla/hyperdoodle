@@ -14,7 +14,6 @@ import java.awt.print.Printable
 import java.awt.print.Printable.NO_SUCH_PAGE
 import java.awt.print.Printable.PAGE_EXISTS
 import java.awt.print.PrinterException
-import java.lang.Float
 import javax.swing.JPanel
 import javax.swing.RepaintManager
 import kotlin.Any
@@ -28,10 +27,10 @@ import kotlin.arrayOfNulls
 /**
  * Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 10:39:06 PM To change this template use Options | File Templates.
  */
-open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Printable /* ,KeyListener */ {
+open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable /* ,KeyListener */ {
     var numSegmentsPerSpine: Int = 20
     private val backgroundColor = getBackground()
-    lateinit var spines: Array<Spine?>
+    private lateinit var spines: Array<Spine?>
     private var doodleWidth = 0
     private var doodleHeight = 0
     private var isPrinting = false
@@ -84,43 +83,22 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
             }
     }
 
-
-    protected fun drawInterior(g: Graphics) {
-        g.setPaintMode()
-
-        val graphics2D = g as Graphics2D
-        val rectangle = Rectangle(XOFFSET, YOFFSET, doodleWidth, doodleHeight)
-
-        graphics2D.color = getBackground()
-        graphics2D.fill(rectangle)
-    }
-
     override fun getBackground(): Color {
-        val background: Color = when {
-            isPrinting               -> Color.white
-            super.background == null -> Color.black
-            else                     -> super.background
+        val backgroundColor: Color = when {
+            isPrinting                    -> Color.white
+            super.getBackground() == null -> Color.black
+            else                          -> super.getBackground()
         }
 
-        return background
+        return backgroundColor
     }
 
     override fun paint(g: Graphics) {
         super.paint(g)
-//        isPrinting = theFrame.isPrinting
-//        doodleWidth = getWidth() - (2 * XOFFSET)
-//        doodleHeight = getHeight() - (2 * YOFFSET)
-//        initializePoints(initialAngle++)
-//
-//        //        drawBounds(g)
-//        drawBorder(g)
-//        drawSpines(g)
-//        drawWebs(g)
-
         val graphics2D = g as Graphics2D
-        val hintsMap: MutableMap<RenderingHints.Key?, Any?> = HashMap<RenderingHints.Key?, Any?>()
+        val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
 
-        hintsMap.put(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+        hintsMap[KEY_ANTIALIASING] = VALUE_ANTIALIAS_ON
         graphics2D.addRenderingHints(hintsMap)
 
         val origXform = graphics2D.transform
@@ -134,33 +112,21 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
         newXform.rotate(Math.toRadians(-1.0 * offsetAngle), center.x, center.y)
 
         isPrinting = theFrame.isPrinting
-        doodleWidth = getWidth() - (2 * XOFFSET)
-        doodleHeight = getHeight() - (2 * YOFFSET)
+        doodleWidth = width - (2 * XOFFSET)
+        doodleHeight = height - (2 * YOFFSET)
 
         drawBounds(g)
         drawBorder(g)
 
-        // drawSpines(graphics2D);
         graphics2D.transform = newXform
         drawWebs(graphics2D)
     }
 
     /** Draw the webs between all the spines */
     private fun drawWebs(g: Graphics2D) {
-        // for three spines, draw webs between 0-1, 1-2, 2-0
-//        (0..<numberOfSpines).forEach { i ->
-//            val j = (i + 1) % numberOfSpines
-//            drawWeb(g, spines[i]!!, spines[j]!!)
-//        }
-
-
-        // for three spines, draw webs between 1-3,2-2, 3-1
-        for (i in 0..<numberOfSpines) {
-            var j = i + 1
-
-            if (j == numberOfSpines) {
-                j = 0
-            }
+        // for three spines, draw webs between 1-3, 2-2, and 3-1
+        (0..<numberOfSpines).forEach { i ->
+            val j = (i + 1) % numberOfSpines
 
             drawFilledWeb(g, spines[i]!!, spines[j]!!)
         }
@@ -169,26 +135,15 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
     }
 
     private fun drawFilledWeb(g: Graphics2D, spine1: Spine, spine2: Spine) {
-        drawWebSpineN(g, spine1, spine2)
-    }
-
-    private fun drawWebSpineN(
-        g: Graphics2D,
-        spine1: Spine,
-        spine2: Spine,
-    ) {
-        val lines: Array<Line?> = arrayOfNulls<Line>(numSegmentsPerSpine + 2)
+        val lines: Array<Line?> = arrayOfNulls(numSegmentsPerSpine + 2)
         lines[0] = spine1.getLine()
-
         (numSegmentsPerSpine downTo 1).forEach { i ->
             val point1: Point = spine1.points[i]!!
             val point2: Point = spine2.points[numSegmentsPerSpine - i + 1]!!
 
             lines[numSegmentsPerSpine - i + 1] = Line(Point(point1.x, point1.y), Point(point2.x, point2.y))
         }
-
         lines[numSegmentsPerSpine + 1] = spine2.getLine()
-
 
         (0..<(lines.size - 2)).forEach { i ->
             // special case - point s0 and s1
@@ -196,10 +151,7 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
             // adjust offset so no lines are vertical
 
             // special case for first polygon, which is always a triangle
-
             splitAndDrawTriangle(g, lines[i]!!, lines[i + 1]!!, lines[i + 2]!!)
-
-            // break;
 
             // now iterate through the remaining lines
             (i + 1..<(lines.size - 1)).forEach { j ->
@@ -265,57 +217,41 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
         val p3y = intersectionPoint.y
 
         // todo why was this check needed?
-//        if (!Double.(p1x) && !Float.isNaN(p1y) && !Float.isNaN(p2x) && !Float.isNaN(p2y) && !Float.isNaN(p3x) && !Float.isNaN(p3y)) {
-            val path = GeneralPath()
+        //        if (!Double.(p1x) && !Float.isNaN(p1y) && !Float.isNaN(p2x) && !Float.isNaN(p2y) && !Float.isNaN(p3x) && !Float.isNaN(p3y)) {
+        val path = GeneralPath()
 
-            path.moveTo(p1x, p1y)
-            path.lineTo(p2x, p2y)
-            path.lineTo(p3x, p3y)
-            path.lineTo(p1x, p1y)
+        path.moveTo(p1x, p1y)
+        path.lineTo(p2x, p2y)
+        path.lineTo(p3x, p3y)
+        path.lineTo(p1x, p1y)
 
-            path.closePath()
+        path.closePath()
 
-            if (fillTriangle) {
-                g.fill(path)
-            }
-            else {
-                g.draw(path)
-            }
-//        }
-    }
-
-
-    /** Draw the lines between the spines that look like a spider's web. */
-    private fun drawWeb(
-        g: Graphics,
-        spine1: Spine,
-        spine2: Spine,
-    ) {
-        (0..numSegmentsPerSpine).forEach { i ->
-            val point1 = spine1.points[i]!!
-            val point2 = spine2.points[numSegmentsPerSpine - i]!!
-            g.drawLine(point1.x.toInt(), point1.y.toInt(), point2.x.toInt(), point2.y.toInt())
+        if (fillTriangle) {
+            g.fill(path)
         }
+        else {
+            g.draw(path)
+        }
+        //        }
     }
 
-    fun initializePoints(initialAngle: Double):Point {
-//        this.initialAngle = initialAngle
-
-        val centerX = (doodleWidth + (2 * XOFFSET)) / 2
-        val centerY = (doodleHeight + (2 * YOFFSET)) / 2
-        val center = Point(centerX.toDouble(), centerY.toDouble())
+    fun initializePoints(initialAngle: Double): Point {
+        val centerX = ((doodleWidth + (2 * XOFFSET)) / 2).toDouble()
+        val centerY = ((doodleHeight + (2 * YOFFSET)) / 2).toDouble() //+200
+        val center = Point(centerX, centerY)
         spines = arrayOfNulls(numberOfSpines)
 
-        (0..(numberOfSpines - 1)).forEach { spineNumber ->
+        (0..<numberOfSpines).forEach { spineNumber ->
             val angle = (360.0 / numberOfSpines * spineNumber) + initialAngle - 90
             println("angle = $angle")
-            spines[spineNumber] = Spine(center, centerY.toDouble(), angle, numSegmentsPerSpine)
+            spines[spineNumber] = Spine(center, centerY, angle, numSegmentsPerSpine)
         }
         return center
     }
 
     /** Draw a boundary around the entire doodle */
-    protected fun drawBounds(g: Graphics): Graphics2D {
+    private fun drawBounds(g: Graphics): Graphics2D {
         val graphics2D = g as Graphics2D
         var rectangle = Rectangle(0, 0, doodleWidth + (2 * XOFFSET), doodleHeight + (2 * YOFFSET))
 
@@ -325,32 +261,22 @@ open class HyperDoodlePanel(private val theFrame: DoodleFrame) : JPanel(), Print
 
         graphics2D.color = getBackground()
         graphics2D.fill(rectangle)
-        graphics2D.color = getForeground()
+        graphics2D.color = foreground
         graphics2D.draw(rectangle)
 
         return graphics2D
     }
 
     /** Draw a boundary around the entire doodle */
-    protected fun drawBorder(g: Graphics) {
+    private fun drawBorder(g: Graphics) {
         val graphics2D = g as Graphics2D
 
         graphics2D.setPaintMode()
-
-        graphics2D.color = getForeground()
-
-        var rectangle = Rectangle(0, 0, doodleWidth + (2 * XOFFSET), YOFFSET)
-
-        graphics2D.fill(rectangle)
-
-        rectangle = Rectangle(doodleWidth + XOFFSET, YOFFSET, XOFFSET, doodleHeight)
-        graphics2D.fill(rectangle)
-
-        rectangle = Rectangle(0, doodleHeight + YOFFSET, doodleWidth + (2 * XOFFSET), YOFFSET)
-        graphics2D.fill(rectangle)
-
-        rectangle = Rectangle(0, YOFFSET, XOFFSET, doodleHeight)
-        graphics2D.fill(rectangle)
+        graphics2D.color = foreground
+        graphics2D.fill(Rectangle(0, 0, doodleWidth + (2 * XOFFSET), YOFFSET))
+        graphics2D.fill(Rectangle(doodleWidth + XOFFSET, YOFFSET, XOFFSET, doodleHeight))
+        graphics2D.fill(Rectangle(0, doodleHeight + YOFFSET, doodleWidth + (2 * XOFFSET), YOFFSET))
+        graphics2D.fill(Rectangle(0, YOFFSET, XOFFSET, doodleHeight))
     }
 
     fun setNumberOfSpines(numberOfSpines: Int) {

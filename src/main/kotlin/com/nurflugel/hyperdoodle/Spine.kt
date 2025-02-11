@@ -5,7 +5,12 @@ import com.nurflugel.hyperdoodle.HyperDoodlePanel.Companion.DRAW_POINT_COORDINAT
 import java.awt.Graphics2D
 import java.lang.StrictMath.PI
 
-/** Representation of the spine of the doodle.  */
+/** Representation of the spine of the doodle.
+ * @param  center            the center of the spine
+ * @param  length            the length
+ * @param  angle             in degrees
+ * @param  numPointsPerSide  the number of points per spine - must be the same for all
+ */
 class Spine
     (
     center: Point,
@@ -15,12 +20,6 @@ class Spine
 ) {
     val points: Array<Point?>
 
-    /**
-     * @param  center            the center of the spine
-     * @param  length            the length
-     * @param  angle             in degrees
-     * @param  numPointsPerSide  the number of points per spine - must be the same for all
-     */
     init {
         val angleInDegrees = angle / 360 * (2 * PI)
         val deltaLength = length / numPointsPerSide
@@ -33,7 +32,6 @@ class Spine
             points[i] = Point(x, y)
         }
     }
-
 
     fun getLine(): Line {
         return Line(points[0]!!, points[points.size - 1]!!)

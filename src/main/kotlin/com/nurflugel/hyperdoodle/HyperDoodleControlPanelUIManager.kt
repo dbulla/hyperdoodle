@@ -16,17 +16,17 @@ import javax.swing.JPanel
 /**
  * @author  Douglas Bullard
  */
-class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
-    private val doodleFrame: DoodleFrame
-    lateinit var quitButton: JButton
-    lateinit var printButton: JButton
+class HyperDoodleControlPanelUIManager(doodleFrame: HyperDoodleFrame) : JPanel(BorderLayout()) {
+    private val doodleFrame: HyperDoodleFrame
+    private lateinit var quitButton: JButton
+    private lateinit var printButton: JButton
     var isPrinting: Boolean = false
         private set
-    lateinit var contentPanel: JPanel
-    lateinit var drawButton: JButton
-    lateinit var pointsPerSpineComboBox: JComboBox<String>
-    lateinit var numberOfSpinesComboBox: JComboBox<String>
-    lateinit var rotateButton: JButton
+    private lateinit var contentPanel: JPanel
+    private lateinit var drawButton: JButton
+    private lateinit var pointsPerSpineComboBox: JComboBox<String>
+    private lateinit var numberOfSpinesComboBox: JComboBox<String>
+    private lateinit var rotateButton: JButton
 
     /** Creates new form ControlPanel.  */
     init {
@@ -61,15 +61,16 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         printButton = JButton("Print")
         drawButton = JButton("Draw")
         rotateButton = JButton("Rotate")
-        pointsPerSpineComboBox= JComboBox<String>(DefaultComboBoxModel(arrayOf("3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20")))
+        pointsPerSpineComboBox =
+            JComboBox<String>(DefaultComboBoxModel(arrayOf("3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20")))
         numberOfSpinesComboBox = JComboBox<String>(DefaultComboBoxModel(arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")))
 
-        quitButton.addActionListener { evt: ActionEvent -> quitButtonActionPerformed() }
-        pointsPerSpineComboBox.addActionListener { evt: ActionEvent -> this.numPointsSpinnerStateChanged(evt) }
-        numberOfSpinesComboBox.addActionListener { evt: ActionEvent -> this.numberOfSpinesStateChanged(evt) }
+        quitButton.addActionListener { quitButtonActionPerformed() }
+        pointsPerSpineComboBox.addActionListener { this.draw() }
+        numberOfSpinesComboBox.addActionListener { this.draw() }
         drawButton.addActionListener { draw() }
         printButton.addActionListener { it: ActionEvent ->
-            if (it.getSource() is JButton) {
+            if (it.source is JButton) {
                 val printJob = PrinterJob.getPrinterJob()
 
                 printJob.setPrintable(doodleFrame.doodlePanel)
@@ -90,7 +91,7 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     }
 
     private fun draw(angle: Int = 0) {
-        val model = numberOfSpinesComboBox.getModel()
+        val model = numberOfSpinesComboBox.model
         val numberOfSpines = model?.selectedItem.toString().toInt()
         val numberOfPoints = pointsPerSpineComboBox.selectedItem?.toString()?.toInt()!!
 
@@ -102,24 +103,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         doodlePanel.invalidate()
         doodlePanel.repaint()
     }
-
-
-    private fun numPointsSpinnerStateChanged(evt: ActionEvent) {
-        val source = evt.getSource()
-
-        if (source == pointsPerSpineComboBox) {
-            draw()
-        }
-    }
-
-    private fun numberOfSpinesStateChanged(evt: ActionEvent) {
-        val source = evt.getSource()
-
-        if (source == numberOfSpinesComboBox) {
-            draw()
-        }
-    }
-
 
     private fun quitButtonActionPerformed() {
         System.exit(0)
