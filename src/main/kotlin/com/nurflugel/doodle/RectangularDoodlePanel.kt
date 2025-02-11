@@ -79,7 +79,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         pi: Int,
     ): Int {
         if (pi >= 1) {
-            return Printable.NO_SUCH_PAGE;
+            return Printable.NO_SUCH_PAGE
         }
 
         paint(g)
@@ -148,7 +148,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
         if (theFrame.isAddLocusMode) {
             val point = e.point
-            val newLocus: Locus = Locus((point.getX().toInt()), (point.getY().toInt()))
+            val newLocus = Locus((point.getX().toInt()), (point.getY().toInt()))
 
             locusList.add(newLocus)
             if (worker != null) {

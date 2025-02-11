@@ -1,10 +1,8 @@
 package com.nurflugel.doodle
 
 import com.nurflugel.hyperdoodle.Point
-import java.time.Clock
 import java.time.Instant
 import java.util.*
-import kotlin.math.max
 import kotlin.math.sin
 import kotlin.random.Random
 

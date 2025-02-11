@@ -18,7 +18,7 @@ private const val INITIAL_POINTS_VALUE = 40
  * @author Douglas Bullard
  */
 class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
-    private lateinit var doodleFrame: DoodleFrame
+    private var doodleFrame: DoodleFrame
     private  var useUIManager = false
     private lateinit var addLocusPointsRadioButton: JRadioButton
     private lateinit var addMoveRemoteButtonGroup: ButtonGroup
