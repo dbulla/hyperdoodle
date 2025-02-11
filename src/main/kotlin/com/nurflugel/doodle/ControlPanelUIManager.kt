@@ -46,7 +46,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         initComponents()
         /** Set content pane  */
         add(contentPanel)
-        println("ControlPanelUIManager.ControlPanelUIManager")
         this.doodleFrame = doodleFrame
     }
 
@@ -187,20 +186,9 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private fun numPointsSpinnerMouseWheelMoved(e: MouseWheelEvent) {
 
         val scrollAmount = e.scrollAmount
-        val scrollType = e.scrollType
-
-        println("scrollType = $scrollType")
-
-        val unitsToScroll = e.unitsToScroll
-
-        println("unitsToScroll = $unitsToScroll")
-
         val wheelRotation = e.wheelRotation
         val value = (numPointsSpinner.value as Int)
 
-        println("wheelRotation = " + (value + wheelRotation))
-        println("scrollAmount = $scrollAmount")
-        println("value = $value")
         if (value in MIN_POINTS_VALUE..MAX_POINTS_VALUE) {
             numPointsSpinner.value = value + wheelRotation
             doodleFrame.setNumPointsPerSide(wheelRotation)
@@ -209,14 +197,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
     val isWandering: Boolean
         get() = wanderModeRadioButton.isSelected
-
-//    private fun removeLocusPointsRadioButtonActionPerformed() {
-//        // Add your handling code here:
-//    }
-//
-//    private fun moveLocusPointsRadioButtonActionPerformed() {
-//        // Add your handling code here:
-//    }
 
     val isAddLocusMode: Boolean
         get() = addLocusPointsRadioButton.isSelected

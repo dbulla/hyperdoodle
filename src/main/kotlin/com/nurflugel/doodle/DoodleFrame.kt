@@ -10,9 +10,9 @@ import javax.swing.JFrame
 
 /** Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 4:21:02 PM To change this template use Options | File Templates.  */
 class DoodleFrame : JFrame() {
-    private lateinit var doodlePanel: DoodlePanel
-    private lateinit var controlPanel: ControlPanelUIManager
-    private  var useFullScreenMode = false
+    private var doodlePanel: RectangularDoodlePanel
+    private var controlPanel: ControlPanelUIManager
+    private var useFullScreenMode = false
 
     init {
         val contentPane = contentPane
@@ -20,7 +20,7 @@ class DoodleFrame : JFrame() {
         val screen = graphicsEnvironment.defaultScreenDevice
         val isFullScreenSupported = screen.isFullScreenSupported
 
-        check(isFullScreenSupported) { "full screen mode not suported" }
+        check(isFullScreenSupported) { "full screen mode not supported" }
 
         val myWindow = owner
 
@@ -52,15 +52,11 @@ class DoodleFrame : JFrame() {
             addKeyListener(object : KeyAdapter() {
                 override fun keyTyped(e: KeyEvent) {
                     super.keyTyped(e)
-                    println("DoodleFrame.keyTyped")
                 }
 
                 override fun keyPressed(e: KeyEvent) {
-                    println("DoodlePanel.keyPressed")
                     super.keyPressed(e)
-
                     val keyCode = e.keyCode
-
                     if (keyCode == KeyEvent.VK_ESCAPE) {
                         invertControlPanelVisibility()
                     }
@@ -75,13 +71,10 @@ class DoodleFrame : JFrame() {
 
     @Synchronized
     fun stop() {
-        println("DoodleFrame.stop")
         doodlePanel.stopWandering()
     }
 
     fun animate() {
-        println("DoodleFrame.animate")
-
         doodlePanel.wander()
     }
 
@@ -112,7 +105,7 @@ class DoodleFrame : JFrame() {
         controlPanel.isVisible = !currentVisibility
     }
 
-    fun getDoodlePanel(): Printable? {
+    fun getDoodlePanel(): Printable {
         return doodlePanel
     }
 
@@ -123,8 +116,7 @@ class DoodleFrame : JFrame() {
         @JvmStatic
         fun main(args: Array<String>) {
             val doodleFrame = DoodleFrame()
-
-            doodleFrame.show()
+            doodleFrame.isVisible = true
         }
     }
 }

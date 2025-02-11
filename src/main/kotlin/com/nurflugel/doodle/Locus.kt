@@ -4,6 +4,7 @@ import com.nurflugel.hyperdoodle.Point
 import java.time.Clock
 import java.time.Instant
 import java.util.*
+import kotlin.math.max
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -30,26 +31,22 @@ class Locus(var x: Int, var y: Int) {
         screenHeight: Double,
         screenCenter: Point,
     ) {
-        //	    System.out.println("Locus.wander");
         val xFactor = getFactor(xPeriod)
         val yFactor = getFactor(yPeriod)
 
-        //				int width = (int) (maxWidth * zoomFactor);
-        //				int height = (int) (maxHeight * zoomFactor);
-        //				int maxX = screenWidth - width;
-        //				int x = (int) (maxX * xFactor);
-        //
-        //				int maxY = screenHeight - height;
-        //				int y = (int) (maxY * yFactor);
-
-
-//        x = ((screenWidth + 100) * xFactor).toInt() - 50
-//        y = ((screenHeight) + (100 * yFactor)).toInt() - 50
-
         x = (screenCenter.x + xFactor * screenCenter.x).toInt()
         y = (screenCenter.y + yFactor * screenCenter.y).toInt()
-//        x = (x + xFactor * screenCenter.x).toInt()
-//        y = (y + yFactor * screenCenter.y).toInt()
+//        x = clip((x + sin(rand.nextDouble() * 10)*10).toInt(),screenWidth.toInt())
+//        y = clip((y + sin(rand.nextDouble() * 10)*10).toInt(),screenHeight.toInt())
+//        println("x: $x; y: $y")
+    }
+
+    private fun clip(value: Int, maxValue: Int): Int {
+        return when {
+            value < 0        -> 0
+            value > maxValue -> maxValue
+            else             -> value
+        }
     }
 
     private fun getFactor(period: Int): Double {
