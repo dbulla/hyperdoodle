@@ -11,7 +11,6 @@ import javax.swing.border.EtchedBorder
 
 private const val MIN_POINTS_VALUE = 2
 private const val MAX_POINTS_VALUE = 200
-private const val INITIAL_POINTS_VALUE = 40
 
 /**
  * @author Douglas Bullard
@@ -29,7 +28,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private lateinit var numPointsSpinner: JSpinner
     private lateinit var quitButton: JButton
     private lateinit var printButton: JButton
-    private lateinit var fullScreenButton: JButton
     private lateinit var radioButtonPanel: JPanel
     private lateinit var removeLocusPointsRadioButton: JRadioButton
     private lateinit var fixedModeRadioButton: JRadioButton
@@ -37,7 +35,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     var isPrinting: Boolean = false
         private set
     private lateinit var contentPanel: JPanel
-    private lateinit var buttonPanel: JPanel
 
     /**
      * Creates new form ControlPanel
@@ -63,7 +60,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
             clearButton = JButton("Clear")
             printButton = JButton("Print")
-            fullScreenButton = JButton("Full Screen")
             quitButton = JButton("Quit")
             layout = GridBagLayout()
 
@@ -93,12 +89,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
             gridBagConstraints = GridBagConstraints()
             gridBagConstraints.gridx = 2
             gridBagConstraints.gridy = 3
-            gridBagConstraints.fill = HORIZONTAL
-            add(fullScreenButton, gridBagConstraints)
-
-            gridBagConstraints = GridBagConstraints()
-            gridBagConstraints.gridx = 2
-            gridBagConstraints.gridy = 4
             gridBagConstraints.fill = HORIZONTAL
             add(quitButton, gridBagConstraints)
 
@@ -167,7 +157,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         numPointsSpinner.addChangeListener { doodleFrame.setNumPointsPerSide(numPointsSpinner.model.value.toString().toInt()) }
         numPointsSpinner.addMouseWheelListener { numPointsSpinnerMouseWheelMoved(it) }
         printButton.addActionListener { printScreen() }
-//        fullScreenButton.addActionListener { doodleFrame.setFullScreen() }
     }
 
     fun setWanderMode() {
@@ -191,8 +180,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     }
 
     private fun numPointsSpinnerMouseWheelMoved(e: MouseWheelEvent) {
-
-        val scrollAmount = e.scrollAmount
         val wheelRotation = e.wheelRotation
         val value = (numPointsSpinner.value as Int)
 
@@ -213,4 +200,8 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
     val isRemoveLocusMode: Boolean
         get() = removeLocusPointsRadioButton.isSelected // End of variables declaration//GEN-END:variables
+
+    companion object {
+        const val INITIAL_POINTS_VALUE=40
+    }
 }

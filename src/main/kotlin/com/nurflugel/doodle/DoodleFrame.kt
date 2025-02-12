@@ -37,28 +37,12 @@ class DoodleFrame : JFrame() {
             contentPane.add(CENTER, doodlePanel)
             contentPane.add(EAST, controlPanel)
 
-            //            size = Toolkit.getDefaultToolkit().screenSize
-            //            setFullScreen()
-            size = Dimension(1000, 700);
+            size = Toolkit.getDefaultToolkit().screenSize
+            //            size = Dimension(1000, 700);
 
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent) {
                     exitForm()
-                }
-            })
-
-            addKeyListener(object : KeyAdapter() { // todo this doesn't work here...
-                override fun keyTyped(e: KeyEvent) {
-                    super.keyTyped(e)
-                }
-
-                override fun keyPressed(e: KeyEvent) {
-                    super.keyPressed(e)
-                    println("Keypressed e = ${e}")
-                    val keyCode = e.keyCode
-                    if (keyCode == KeyEvent.VK_ESCAPE) {
-                        invertControlPanelVisibility()
-                    }
                 }
             })
         } finally {
@@ -67,7 +51,7 @@ class DoodleFrame : JFrame() {
     }
 
     fun setFullScreen(shouldSet: Boolean): GraphicsDevice? {
-        controlPanel.isVisible=!shouldSet
+        controlPanel.isVisible = !shouldSet
         val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
         val device = env.defaultScreenDevice
         device.fullScreenWindow = if (shouldSet) this else null

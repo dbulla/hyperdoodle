@@ -66,7 +66,7 @@ class Locus(var x: Int, var y: Int) {
 
     companion object {
         // in milliseconds
-        private const val MIN_PERIOD = 6000
+        private const val MIN_PERIOD = 3000
         private const val MAX_PERIOD = 60000
     }
 }

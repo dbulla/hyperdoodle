@@ -26,10 +26,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     private var doodleWidth = 0
     private var doodleHeight = 0
     private var isPrinting = false
-    private var numPointsPerSide: Int = 20
+    private var numPointsPerSide: Int = ControlPanelUIManager.INITIAL_POINTS_VALUE
     private lateinit var sides: Array<Side?>
     private var locusList: MutableList<Locus> = mutableListOf()
-    private var pointsInitialized: Boolean = false
     private var selectedLocus: Locus? = null
     private var worker: SwingWorker? = null
 
@@ -142,13 +141,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     /** Invoked when the mouse button has been clicked (pressed and released) on a component.  */
     override fun mouseClicked(e: MouseEvent) {
-        val altDown = e.isAltDown
-        val metaDown = e.isMetaDown
-        val shiftDown = e.isShiftDown
-        val controlDown = e.isControlDown
-
-        println("altDown = $altDown metaDown = $metaDown shiftDown = $shiftDown controlDown = $controlDown")
-        if (metaDown) {
+        // check to see if full screen mode is requested
+        if (e.isMetaDown) {
             theFrame.setFullScreen(!theFrame.isFullScreen())
         }
         else {
@@ -157,11 +151,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
                 val newLocus = Locus((point.getX().toInt()), (point.getY().toInt()))
 
                 locusList.add(newLocus)
-                if (worker != null) {
-                    initializePoints()
-                    stopWandering()
-                    wander()
-                }
+                initializePoints()
+                stopWandering()
+                wander()
             }
             else {
                 val x = e.x
@@ -197,10 +189,6 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         // System.out.println("DoodlePanel.mouseReleased");
     }
 
-    //    fun reinitializePoints() {
-    //        pointsInitialized = false
-    //    }
-
     fun setNumPoints(numPointsPerSide: Int) {
         this.numPointsPerSide = numPointsPerSide
         //        pointsInitialized = false
@@ -209,12 +197,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     }
 
     fun clear() {
-        locusList = mutableListOf()
+        locusList.clear()
         repaint()
     }
-
-    //    private val locusPoints: MutableList<Locus>
-    //        get() = locusList
 
     /**
      * Invoked when a mouse button is pressed on a component and then dragged. `MOUSE_DRAGGED` events will continue to be delivered to the
@@ -305,15 +290,12 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     }
 
     /** Create the points around the perimeter of the drawing */
-    fun initializePoints() {
-        //        if (!pointsInitialized) {
+    private fun initializePoints() {
         sides = arrayOfNulls(NUM_SIDES)
         sides[0] = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
         sides[1] = Side(Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), numPointsPerSide)
         sides[2] = Side(Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight), numPointsPerSide)
         sides[3] = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
-        //            pointsInitialized = true
-        //        }
     }
 
     override fun paint(g: Graphics) {
@@ -331,24 +313,15 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
             drawInnerStuffForLocus(g, locus)
             drawLocusPoint(g, locus)
         }
-
-        //        (0..<locusList.size).forEach { i ->
-        //            locus = locusList[i]
-        //            drawLocusPoint(g, locus)
-        //        }
-
         drawBorder(g)
     }
 
     private fun drawBorder(g: Graphics) {
         val graphics2D = g as Graphics2D
-
         graphics2D.setPaintMode()
-
         graphics2D.color = foreground
 
         var rectangle = Rectangle(0, 0, doodleWidth + (2 * XOFFSET), YOFFSET)
-
         graphics2D.fill(rectangle)
 
         rectangle = Rectangle(doodleWidth + XOFFSET, YOFFSET, XOFFSET, doodleHeight)
