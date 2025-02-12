@@ -1,12 +1,12 @@
 package com.nurflugel.doodle
 
 import java.awt.*
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
+import java.awt.BorderLayout.CENTER
+import java.awt.BorderLayout.EAST
+import java.awt.event.*
 import java.awt.print.Printable
 import javax.swing.JFrame
+
 
 /** Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 4:21:02 PM To change this template use Options | File Templates.  */
 class DoodleFrame : JFrame() {
@@ -34,28 +34,27 @@ class DoodleFrame : JFrame() {
             doodlePanel = RectangularDoodlePanel(this)
             controlPanel = ControlPanelUIManager(this)
             contentPane.layout = BorderLayout()
-            contentPane.add(BorderLayout.CENTER, doodlePanel)
-            contentPane.add(BorderLayout.EAST, controlPanel)
+            contentPane.add(CENTER, doodlePanel)
+            contentPane.add(EAST, controlPanel)
 
-            val toolkit = Toolkit.getDefaultToolkit()
-            val screenSize = toolkit.screenSize
+            //            size = Toolkit.getDefaultToolkit().screenSize
+            //            setFullScreen()
+            size = Dimension(1000, 700);
 
-            size = screenSize
-
-            // setSize(new Dimension(1000, 700));
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent) {
                     exitForm()
                 }
             })
 
-            addKeyListener(object : KeyAdapter() {
+            addKeyListener(object : KeyAdapter() { // todo this doesn't work here...
                 override fun keyTyped(e: KeyEvent) {
                     super.keyTyped(e)
                 }
 
                 override fun keyPressed(e: KeyEvent) {
                     super.keyPressed(e)
+                    println("Keypressed e = ${e}")
                     val keyCode = e.keyCode
                     if (keyCode == KeyEvent.VK_ESCAPE) {
                         invertControlPanelVisibility()
@@ -63,10 +62,24 @@ class DoodleFrame : JFrame() {
                 }
             })
         } finally {
-            if (useFullScreenMode) {
-                screen.fullScreenWindow = null
-            }
+
         }
+    }
+
+    fun setFullScreen(shouldSet: Boolean): GraphicsDevice? {
+        controlPanel.isVisible=!shouldSet
+        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        val device = env.defaultScreenDevice
+        device.fullScreenWindow = if (shouldSet) this else null
+        return device
+    }
+
+    fun isFullScreen(): Boolean {
+        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        val gd = ge.defaultScreenDevice
+        val isFullScreen = gd.fullScreenWindow != null
+        println("isFullScreen = $isFullScreen")
+        return isFullScreen
     }
 
     @Synchronized

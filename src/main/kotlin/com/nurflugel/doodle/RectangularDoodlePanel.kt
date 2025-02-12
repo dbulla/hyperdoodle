@@ -8,9 +8,7 @@ import java.awt.Rectangle
 import java.awt.RenderingHints
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
-import java.awt.event.MouseMotionListener
+import java.awt.event.*
 import java.awt.geom.GeneralPath
 import java.awt.print.PageFormat
 import java.awt.print.Printable
@@ -39,13 +37,17 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         private const val LOCUS_POINT_RADIUS: Int = 10
         private const val MIN_LOCUS_DISTANCE: Int = 25
         private const val NUM_SIDES = 4
-        const val XOFFSET = 10
-        const val YOFFSET = 10
+
+        //        const val XOFFSET = 10
+        //        const val YOFFSET = 10
+        const val XOFFSET = 0
+        const val YOFFSET = 0
     }
 
     init {
         addMouseListener(this)
         addMouseMotionListener(this)
+
     }
 
     fun wander() {
@@ -57,7 +59,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
                     val screenWidth = width.toDouble()
                     val screenHeight = height.toDouble()
                     val screenCenter = Point((screenWidth / 2.0), (screenHeight / 2.0))
-                    (0..<locusListSize).forEach { locusList[it].wander(screenWidth, screenHeight, screenCenter) }
+                    if (locusList.isNotEmpty()) {
+                        (0..<locusListSize).forEach { locusList[it].wander(screenWidth, screenHeight, screenCenter) }
+                    }
 
                     repaint()
                 }
@@ -87,13 +91,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         return Printable.PAGE_EXISTS
     }
 
-    private fun drawInnerStuffForLocus(
-        graphicsD: Graphics,
-        locus: Locus,
-    ) {
-
+    private fun drawInnerStuffForLocus(graphicsD: Graphics, locus: Locus) {
         val graphics2D = graphicsD as Graphics2D
-        val points = points
+        //        val points = points
         val numPoints = points.size
         val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
 
@@ -108,11 +108,9 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
             var point = points[i]
             path.lineTo(point!!.x.toFloat(), point.y.toFloat())
 
-            point = if (i == (numPoints - 1)) {
-                points[0]
-            }
-            else {
-                points[i + 1]
+            point = when (i) {
+                numPoints - 1 -> points[0]
+                else          -> points[i + 1]
             }
 
             path.lineTo(point!!.x.toFloat(), point.y.toFloat())
@@ -129,12 +127,11 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
             var index = 0
             var side: Side
 
-            for (element in sides) {
-                side = element!!
+            sides.forEach { element ->
 
-                val sidePoints: Array<Point?> = side.points
+                val sidePoints: Array<Point?> = element!!.points
 
-                for (pointNumber in sidePoints.indices) {
+                sidePoints.indices.forEach { pointNumber ->
                     points[index] = sidePoints[pointNumber]
                     index++
                 }
@@ -145,24 +142,35 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     /** Invoked when the mouse button has been clicked (pressed and released) on a component.  */
     override fun mouseClicked(e: MouseEvent) {
+        val altDown = e.isAltDown
+        val metaDown = e.isMetaDown
+        val shiftDown = e.isShiftDown
+        val controlDown = e.isControlDown
 
-        if (theFrame.isAddLocusMode) {
-            val point = e.point
-            val newLocus = Locus((point.getX().toInt()), (point.getY().toInt()))
-
-            locusList.add(newLocus)
-            if (worker != null) {
-                stopWandering()
-                wander()
-            }
+        println("altDown = $altDown metaDown = $metaDown shiftDown = $shiftDown controlDown = $controlDown")
+        if (metaDown) {
+            theFrame.setFullScreen(!theFrame.isFullScreen())
         }
         else {
-            val x = e.x
-            val y = e.y
-            val numLocusPoints: Int = locusList.size
+            if (theFrame.isAddLocusMode) {
+                val point = e.point
+                val newLocus = Locus((point.getX().toInt()), (point.getY().toInt()))
 
-            for (i in 0..<numLocusPoints) {
-                determineSelectedLocusPoint(i, x, y)
+                locusList.add(newLocus)
+                if (worker != null) {
+                    initializePoints()
+                    stopWandering()
+                    wander()
+                }
+            }
+            else {
+                val x = e.x
+                val y = e.y
+                val numLocusPoints: Int = locusList.size
+
+                for (i in 0..<numLocusPoints) {
+                    determineSelectedLocusPoint(i, x, y)
+                }
             }
         }
 
@@ -189,9 +197,14 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         // System.out.println("DoodlePanel.mouseReleased");
     }
 
+    //    fun reinitializePoints() {
+    //        pointsInitialized = false
+    //    }
+
     fun setNumPoints(numPointsPerSide: Int) {
         this.numPointsPerSide = numPointsPerSide
-        pointsInitialized = false
+        //        pointsInitialized = false
+        initializePoints()
         repaint()
     }
 
@@ -291,21 +304,16 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         return selectedLocus
     }
 
-    private fun initializePoints() {
-        if (!pointsInitialized) {
-            sides = arrayOfNulls(NUM_SIDES)
-            sides[0] = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
-            sides[1] = Side(
-                Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight),
-                numPointsPerSide
-            )
-            sides[2] = Side(
-                Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight),
-                numPointsPerSide
-            )
-            sides[3] = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
-            pointsInitialized = true
-        }
+    /** Create the points around the perimeter of the drawing */
+    fun initializePoints() {
+        //        if (!pointsInitialized) {
+        sides = arrayOfNulls(NUM_SIDES)
+        sides[0] = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
+        sides[1] = Side(Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), numPointsPerSide)
+        sides[2] = Side(Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight), numPointsPerSide)
+        sides[3] = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
+        //            pointsInitialized = true
+        //        }
     }
 
     override fun paint(g: Graphics) {
@@ -321,12 +329,13 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         (0..<locusList.size).forEach { i ->
             locus = locusList[i]
             drawInnerStuffForLocus(g, locus)
-        }
-
-        (0..<locusList.size).forEach { i ->
-            locus = locusList[i]
             drawLocusPoint(g, locus)
         }
+
+        //        (0..<locusList.size).forEach { i ->
+        //            locus = locusList[i]
+        //            drawLocusPoint(g, locus)
+        //        }
 
         drawBorder(g)
     }

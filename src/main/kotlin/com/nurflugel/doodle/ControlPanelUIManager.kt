@@ -1,12 +1,11 @@
 package com.nurflugel.doodle
 
-import java.awt.BorderLayout
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
-import java.awt.GridLayout
+import java.awt.*
+import java.awt.GridBagConstraints.HORIZONTAL
 import java.awt.event.MouseWheelEvent
 import java.awt.print.PrinterJob
 import javax.swing.*
+import javax.swing.BoxLayout.Y_AXIS
 import javax.swing.border.EtchedBorder
 
 
@@ -19,7 +18,7 @@ private const val INITIAL_POINTS_VALUE = 40
  */
 class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private var doodleFrame: DoodleFrame
-    private  var useUIManager = false
+    private var useUIManager = false
     private lateinit var addLocusPointsRadioButton: JRadioButton
     private lateinit var addMoveRemoteButtonGroup: ButtonGroup
     private lateinit var fixedWanderButtonGroup: ButtonGroup
@@ -30,6 +29,7 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private lateinit var numPointsSpinner: JSpinner
     private lateinit var quitButton: JButton
     private lateinit var printButton: JButton
+    private lateinit var fullScreenButton: JButton
     private lateinit var radioButtonPanel: JPanel
     private lateinit var removeLocusPointsRadioButton: JRadioButton
     private lateinit var fixedModeRadioButton: JRadioButton
@@ -63,12 +63,10 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
             clearButton = JButton("Clear")
             printButton = JButton("Print")
+            fullScreenButton = JButton("Full Screen")
             quitButton = JButton("Quit")
             layout = GridBagLayout()
 
-            clearButton.text = "Clear"
-            printButton.text = "Print"
-            quitButton.text = "Quit"
             radioButtonPanel = JPanel()
             fixedWanderModePanel = JPanel()
             addLocusPointsRadioButton = JRadioButton("Add Points")
@@ -81,21 +79,27 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
             contentPanel = JPanel()
 
             var gridBagConstraints = GridBagConstraints()
-            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridx = 2
             gridBagConstraints.gridy = 1
-            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            gridBagConstraints.fill = HORIZONTAL
             add(clearButton, gridBagConstraints)
 
             gridBagConstraints = GridBagConstraints()
-            gridBagConstraints.gridx = MIN_POINTS_VALUE
-            gridBagConstraints.gridy = MIN_POINTS_VALUE
-            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            gridBagConstraints.gridx = 2
+            gridBagConstraints.gridy = 2
+            gridBagConstraints.fill = HORIZONTAL
             add(printButton, gridBagConstraints)
 
             gridBagConstraints = GridBagConstraints()
-            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridx = 2
             gridBagConstraints.gridy = 3
-            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            gridBagConstraints.fill = HORIZONTAL
+            add(fullScreenButton, gridBagConstraints)
+
+            gridBagConstraints = GridBagConstraints()
+            gridBagConstraints.gridx = 2
+            gridBagConstraints.gridy = 4
+            gridBagConstraints.fill = HORIZONTAL
             add(quitButton, gridBagConstraints)
 
             radioButtonPanel.layout = GridLayout(3, 1)
@@ -113,11 +117,11 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
             gridBagConstraints = GridBagConstraints()
             gridBagConstraints.gridx = 0
             gridBagConstraints.gridy = 0
-            gridBagConstraints.gridwidth = MIN_POINTS_VALUE
-            gridBagConstraints.gridheight = MIN_POINTS_VALUE
+            gridBagConstraints.gridwidth = 2
+            gridBagConstraints.gridheight = 2
             add(radioButtonPanel, gridBagConstraints)
 
-            fixedWanderModePanel.layout = BoxLayout(fixedWanderModePanel, BoxLayout.Y_AXIS)
+            fixedWanderModePanel.layout = BoxLayout(fixedWanderModePanel, Y_AXIS)
             fixedWanderModePanel.border = EtchedBorder()
 
             wanderModeRadioButton.text = "Wander mode"
@@ -129,7 +133,7 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
             fixedWanderModePanel.add(wanderModeRadioButton)
 
             gridBagConstraints = GridBagConstraints()
-            gridBagConstraints.gridx = MIN_POINTS_VALUE
+            gridBagConstraints.gridx = 2
             gridBagConstraints.gridy = 0
             gridBagConstraints.anchor = GridBagConstraints.NORTH
             add(fixedWanderModePanel, gridBagConstraints)
@@ -138,15 +142,15 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
             gridBagConstraints = GridBagConstraints()
             gridBagConstraints.gridx = 1
-            gridBagConstraints.gridy = MIN_POINTS_VALUE
-            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL
+            gridBagConstraints.gridy = 2
+            gridBagConstraints.fill = HORIZONTAL
             gridBagConstraints.ipadx = 12
             add(numPointsSpinner, gridBagConstraints)
 
             numberOfEdgePointsLabel.text = "Number of Edge Points: "
             gridBagConstraints = GridBagConstraints()
             gridBagConstraints.gridx = 0
-            gridBagConstraints.gridy = MIN_POINTS_VALUE
+            gridBagConstraints.gridy = 2
             add(numberOfEdgePointsLabel, gridBagConstraints)
         }
         addMoveRemoteButtonGroup.add(addLocusPointsRadioButton)
@@ -158,13 +162,16 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
 
         clearButton.addActionListener { doodleFrame.clear() }
         quitButton.addActionListener { System.exit(0) }
-//        moveLocusPointsRadioButton.addActionListener { moveLocusPointsRadioButtonActionPerformed() }
-//        removeLocusPointsRadioButton.addActionListener { removeLocusPointsRadioButtonActionPerformed() }
         wanderModeRadioButton.addActionListener { doodleFrame.animate() }
         fixedModeRadioButton.addActionListener { doodleFrame.stop() }
         numPointsSpinner.addChangeListener { doodleFrame.setNumPointsPerSide(numPointsSpinner.model.value.toString().toInt()) }
         numPointsSpinner.addMouseWheelListener { numPointsSpinnerMouseWheelMoved(it) }
         printButton.addActionListener { printScreen() }
+//        fullScreenButton.addActionListener { doodleFrame.setFullScreen() }
+    }
+
+    fun setWanderMode() {
+        wanderModeRadioButton.isSelected = true
     }
 
     private fun printScreen() {
