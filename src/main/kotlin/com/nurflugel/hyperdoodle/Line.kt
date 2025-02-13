@@ -4,7 +4,7 @@ package com.nurflugel.hyperdoodle
 class Line
 /** m=(y1-y2)/(x1-x2) b=y-mx. */
 internal constructor(private val start: Point, private val end: Point) {
-    private val m: Double = (start.y - end.y) / (start.x - end.x)
+    private val m: Double = if(start.x == end.x) Double.MAX_VALUE  else (start.y - end.y) / (start.x - end.x)
     private val b: Double = start.y - m * start.x
 
     val midpoint: Point
@@ -34,6 +34,6 @@ internal constructor(private val start: Point, private val end: Point) {
     }
 
     override fun toString(): String {
-        return "$start-$end"
+        return "m: $m; $start-$end"
     }
 }

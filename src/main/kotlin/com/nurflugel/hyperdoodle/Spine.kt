@@ -15,25 +15,28 @@ class Spine
     (
     center: Point,
     length: Double,
-    angle: Double,
-    numPointsPerSide: Int,
+    private val angle: Double,
+    private val numPointsPerSide: Int,
 ) {
     val points: Array<Point?>
 
     init {
-        val angleInDegrees = angle / 360 * (2 * PI)
+        val angleInRadians = Math.toRadians(angle)
         val deltaLength = length / numPointsPerSide
         points = arrayOfNulls(numPointsPerSide + 1)
 
         (0..numPointsPerSide).forEach { i ->
-            val x = center.x + (deltaLength * i * StrictMath.cos(angleInDegrees))
-            val y = center.y + (deltaLength * i * StrictMath.sin(angleInDegrees))
-
+            val x = center.x + (deltaLength * i * StrictMath.cos(angleInRadians))
+            val y = center.y + (deltaLength * i * StrictMath.sin(angleInRadians))
             points[i] = Point(x, y)
         }
     }
 
     fun getLine(): Line {
         return Line(points[0]!!, points[points.size - 1]!!)
+    }
+
+    override fun toString(): String {
+        return "Spine angle: $angle, numPointsPerSide: $numPointsPerSide"
     }
 }

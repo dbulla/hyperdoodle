@@ -1,6 +1,8 @@
 package com.nurflugel.hyperdoodle
 
 import java.awt.BorderLayout
+import java.awt.BorderLayout.CENTER
+import java.awt.BorderLayout.EAST
 import java.awt.GraphicsEnvironment
 import java.awt.Toolkit
 import java.awt.event.KeyAdapter
@@ -17,7 +19,6 @@ class HyperDoodleFrame : JFrame() {
     private var useFullScreenMode = false
 
     init {
-//        val contentPane = contentPane
         val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
         val screen = graphicsEnvironment.defaultScreenDevice
         val isFullScreenSupported = screen.isFullScreenSupported
@@ -36,12 +37,11 @@ class HyperDoodleFrame : JFrame() {
             hyperDoodlePanel = HyperDoodlePanel(this)
             controlPanel = HyperDoodleControlPanelUIManager(this)
             contentPane.layout = BorderLayout()
-            contentPane.add(BorderLayout.CENTER, hyperDoodlePanel)
-            contentPane.add(BorderLayout.EAST, controlPanel)
+            contentPane.add(CENTER, hyperDoodlePanel)
+            contentPane.add(EAST, controlPanel)
 
             size = Toolkit.getDefaultToolkit().screenSize
 
-            // setSize(new Dimension(1000, 700));
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent?) {
                     exitForm()
@@ -59,14 +59,14 @@ class HyperDoodleFrame : JFrame() {
                     super.keyPressed(e)
 
                     if (e.keyCode == KeyEvent.VK_ESCAPE) {
-                        invertControlPanelVisibility()
+//                        invertControlPanelVisibility()
                     }
                 }
             })
         } finally {
-            if (useFullScreenMode) {
-                screen.fullScreenWindow = null
-            }
+//            if (useFullScreenMode) {
+//                screen.fullScreenWindow = null
+//            }
         }
     }
 
@@ -80,7 +80,6 @@ class HyperDoodleFrame : JFrame() {
     // hyperDoodlePanel.setNumPointsPerSpine(numPoints);
     // }
     fun invertControlPanelVisibility() {
-
         controlPanel.isVisible = !controlPanel.isVisible
     }
 

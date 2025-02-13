@@ -7,7 +7,6 @@ import java.awt.event.*
 import java.awt.print.Printable
 import javax.swing.JFrame
 
-
 /** Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 4:21:02 PM To change this template use Options | File Templates.  */
 class DoodleFrame : JFrame() {
     private var doodlePanel: RectangularDoodlePanel
@@ -15,7 +14,6 @@ class DoodleFrame : JFrame() {
     private var useFullScreenMode = false
 
     init {
-        val contentPane = contentPane
         val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
         val screen = graphicsEnvironment.defaultScreenDevice
         val isFullScreenSupported = screen.isFullScreenSupported
@@ -38,13 +36,13 @@ class DoodleFrame : JFrame() {
             contentPane.add(EAST, controlPanel)
 
             size = Toolkit.getDefaultToolkit().screenSize
-            //            size = Dimension(1000, 700);
 
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent) {
                     exitForm()
                 }
             })
+
         } finally {
 
         }

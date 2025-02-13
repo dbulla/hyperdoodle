@@ -5,18 +5,17 @@
  */
 package com.nurflugel.hyperdoodle
 
-import java.awt.BorderLayout
+import java.awt.GridBagConstraints
+import java.awt.GridBagConstraints.HORIZONTAL
+import java.awt.GridBagLayout
 import java.awt.event.ActionEvent
 import java.awt.print.PrinterJob
-import javax.swing.DefaultComboBoxModel
-import javax.swing.JButton
-import javax.swing.JComboBox
-import javax.swing.JPanel
+import javax.swing.*
 
 /**
  * @author  Douglas Bullard
  */
-class HyperDoodleControlPanelUIManager(doodleFrame: HyperDoodleFrame) : JPanel(BorderLayout()) {
+class HyperDoodleControlPanelUIManager(doodleFrame: HyperDoodleFrame) : JPanel(GridBagLayout()) {
     private val doodleFrame: HyperDoodleFrame
     private lateinit var quitButton: JButton
     private lateinit var printButton: JButton
@@ -24,51 +23,98 @@ class HyperDoodleControlPanelUIManager(doodleFrame: HyperDoodleFrame) : JPanel(B
         private set
     private lateinit var contentPanel: JPanel
     private lateinit var drawButton: JButton
-    private lateinit var pointsPerSpineComboBox: JComboBox<String>
-    private lateinit var numberOfSpinesComboBox: JComboBox<String>
+    private lateinit var pointsPerSpineComboBox: JSpinner
+    private lateinit var numberOfSpinesComboBox: JSpinner
     private lateinit var rotateButton: JButton
 
     /** Creates new form ControlPanel.  */
     init {
         /** Set content pane  */
         initComponents()
-        add(contentPanel, BorderLayout.CENTER)
-        println("ControlPanelUIManager.ControlPanelUIManager")
+        add(contentPanel)
         this.doodleFrame = doodleFrame
 
-        rotateButton.addActionListener { event: ActionEvent? ->
-            (0..359).forEach { i ->
-                println("draw angle = $i")
-
-                try {
-                    Thread.sleep(100)
-
-                    // Thread.currentThread().wait(100);
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-
-                draw(i)
-            }
-        }
+//        rotateButton.addActionListener {
+//            (0..359).forEach { i ->
+//                println("draw angle = $i")
+//
+//                try {
+//                    Thread.sleep(100)
+//
+//                    // Thread.currentThread().wait(100);
+//                } catch (e: InterruptedException) {
+//                    e.printStackTrace()
+//                }
+//
+//                draw(i)
+//            }
+//        }
     }
 
     /**   */
     private fun initComponents() {
-        contentPanel = JPanel(BorderLayout())
+        contentPanel = JPanel()
 
         quitButton = JButton("Quit")
         printButton = JButton("Print")
         drawButton = JButton("Draw")
         rotateButton = JButton("Rotate")
-        pointsPerSpineComboBox =
-            JComboBox<String>(DefaultComboBoxModel(arrayOf("3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20")))
-        numberOfSpinesComboBox = JComboBox<String>(DefaultComboBoxModel(arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")))
+        pointsPerSpineComboBox = JSpinner(SpinnerNumberModel(20, 1, 200,1))
+        numberOfSpinesComboBox = JSpinner(SpinnerNumberModel(3,3, 50,1))
 
-        quitButton.addActionListener { quitButtonActionPerformed() }
-        pointsPerSpineComboBox.addActionListener { this.draw() }
-        numberOfSpinesComboBox.addActionListener { this.draw() }
-        drawButton.addActionListener { draw() }
+        var gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 1
+        gridBagConstraints.fill = HORIZONTAL
+        add(drawButton, gridBagConstraints)
+
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 2
+        gridBagConstraints.fill = HORIZONTAL
+        add(rotateButton, gridBagConstraints)
+
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 3
+        gridBagConstraints.fill = HORIZONTAL
+        add(printButton, gridBagConstraints)
+
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 4
+        gridBagConstraints.fill = HORIZONTAL
+        add(quitButton, gridBagConstraints)
+
+        val numberOfSpinesLabel= JLabel("Number of spines:")
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 0
+        gridBagConstraints.gridy = 5
+        gridBagConstraints.fill = HORIZONTAL
+        add(numberOfSpinesLabel, gridBagConstraints)
+
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 5
+        gridBagConstraints.fill = HORIZONTAL
+        add(numberOfSpinesComboBox, gridBagConstraints)
+
+        val numberOfPointsLabel= JLabel("Number of points per spine:")
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 0
+        gridBagConstraints.gridy = 6
+        gridBagConstraints.fill = HORIZONTAL
+        add(numberOfPointsLabel, gridBagConstraints)
+        gridBagConstraints = GridBagConstraints()
+        gridBagConstraints.gridx = 2
+        gridBagConstraints.gridy = 6
+        gridBagConstraints.fill = HORIZONTAL
+        add(pointsPerSpineComboBox, gridBagConstraints)
+
+        quitButton.addActionListener { System.exit(0) }
+        pointsPerSpineComboBox.addChangeListener { this.drawWithNewParams() }
+        numberOfSpinesComboBox.addChangeListener { this.drawWithNewParams() }
+        drawButton.addActionListener { drawWithNewParams() }
         printButton.addActionListener { it: ActionEvent ->
             if (it.source is JButton) {
                 val printJob = PrinterJob.getPrinterJob()
@@ -86,31 +132,15 @@ class HyperDoodleControlPanelUIManager(doodleFrame: HyperDoodleFrame) : JPanel(B
                 }
             }
         }
-        numberOfSpinesComboBox.selectedItem = 3
-        pointsPerSpineComboBox.selectedItem = 4
+        rotateButton.addActionListener {
+            doodleFrame.hyperDoodlePanel.makeRotate() }
     }
 
-    private fun draw(angle: Int = 0) {
+    private fun drawWithNewParams() {
         val model = numberOfSpinesComboBox.model
-        val numberOfSpines = model?.selectedItem.toString().toInt()
-        val numberOfPoints = pointsPerSpineComboBox.selectedItem?.toString()?.toInt()!!
-
-        val doodlePanel = doodleFrame.hyperDoodlePanel
-        doodlePanel.setNumberOfSpines(numberOfSpines)
-        doodlePanel.numSegmentsPerSpine = numberOfPoints
-        doodlePanel.initializePoints(angle.toDouble())
-
-        doodlePanel.invalidate()
-        doodlePanel.repaint()
+        doodleFrame.hyperDoodlePanel.setNumberOfSpines(model.value.toString().toInt())
+        doodleFrame.hyperDoodlePanel.numSegmentsPerSpine = pointsPerSpineComboBox.value.toString().toInt()
+        doodleFrame.hyperDoodlePanel.repaint()
     }
 
-    private fun quitButtonActionPerformed() {
-        System.exit(0)
-    }
-
-
-    companion object {
-        /** Use serialVersionUID for interoperability.  */
-        private const val serialVersionUID = 3074450308167548365L
-    }
 }

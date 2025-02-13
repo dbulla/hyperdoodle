@@ -1,5 +1,6 @@
 package com.nurflugel.hyperdoodle
 
+import com.nurflugel.doodle.SwingWorker
 import java.awt.Graphics2D
 import java.awt.Graphics
 import java.awt.Color
@@ -27,16 +28,16 @@ import kotlin.arrayOfNulls
 /**
  * Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 10:39:06 PM To change this template use Options | File Templates.
  */
-open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable /* ,KeyListener */ {
+open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable  {
     var numSegmentsPerSpine: Int = 20
-    private val backgroundColor = getBackground()
     private lateinit var spines: Array<Spine?>
     private var doodleWidth = 0
     private var doodleHeight = 0
     private var isPrinting = false
     private var numberOfSpines = 3
-    private var initialAngle = 0.0
-    private val offsetAngle = 10.0 / 3.0
+    private var deltaAngle = 0.00000025// in degrees
+    private var offsetAngle = deltaAngle // in degrees - avoid vertical line at start
+    private var worker: SwingWorker? = null
 
     @Throws(PrinterException::class)
     override fun print(
@@ -49,7 +50,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         }
 
         val graphics2D = graphics as Graphics2D
-
 
         //            pageFormat.setOrientation(PageFormat.LANDSCAPE);
         graphics2D.translate(pageFormat.imageableX, pageFormat.imageableY)
@@ -71,7 +71,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         val graphics2D = g as Graphics2D
         val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
 
-        hintsMap.put(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+        hintsMap[KEY_ANTIALIASING] = VALUE_ANTIALIAS_ON
         graphics2D.addRenderingHints(hintsMap)
 
         spines.filterNotNull()
@@ -109,7 +109,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         val center: Point = initializePoints(offsetAngle)
 
         // Point center = initializePoints(initialAngle + offsetAngle);
-        newXform.rotate(Math.toRadians(-1.0 * offsetAngle), center.x, center.y)
+        newXform.rotate(Math.toRadians(offsetAngle), center.x, center.y)
 
         isPrinting = theFrame.isPrinting
         doodleWidth = width - (2 * XOFFSET)
@@ -128,6 +128,8 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         (0..<numberOfSpines).forEach { i ->
             val j = (i + 1) % numberOfSpines
 
+//            println("i = $i, j = $j, spines[i] = ${spines[i]}, spines[j] = ${spines[j]}")
+            if(spines[i]!=null && spines[j] !=null)
             drawFilledWeb(g, spines[i]!!, spines[j]!!)
         }
 
@@ -148,7 +150,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         (0..<(lines.size - 2)).forEach { i ->
             // special case - point s0 and s1
             // line0 is really the spine, but that may have a slope of infinity... test for this above,
-            // adjust offset so no lines are vertical
+            // adjust offset so no lines are truly vertical
 
             // special case for first polygon, which is always a triangle
             splitAndDrawTriangle(g, lines[i]!!, lines[i + 1]!!, lines[i + 2]!!)
@@ -236,6 +238,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         //        }
     }
 
+    /** angles are in degrees */
     fun initializePoints(initialAngle: Double): Point {
         val centerX = ((doodleWidth + (2 * XOFFSET)) / 2).toDouble()
         val centerY = ((doodleHeight + (2 * YOFFSET)) / 2).toDouble() //+200
@@ -244,7 +247,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
 
         (0..<numberOfSpines).forEach { spineNumber ->
             val angle = (360.0 / numberOfSpines * spineNumber) + initialAngle - 90
-            println("angle = $angle")
+//            println("angle = $angle")
             spines[spineNumber] = Spine(center, centerY, angle, numSegmentsPerSpine)
         }
         return center
@@ -281,6 +284,27 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
 
     fun setNumberOfSpines(numberOfSpines: Int) {
         this.numberOfSpines = numberOfSpines
+    }
+
+    fun makeRotate() {
+
+        worker = object : SwingWorker() {
+            override fun construct(): Any {
+                while (true) {
+//                    initializePoints(offsetAngle)
+                    repaint()
+                    offsetAngle+=0.00000025
+//                    Thread.sleep(1)
+                }
+
+                return "Success" // return value not used by this program
+            }
+        }
+        worker?.start()
+
+    }
+    fun stopRotating() {
+        worker?.interrupt()
     }
 
     companion object {
