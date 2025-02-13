@@ -1,6 +1,7 @@
 package com.nurflugel.doodle
 
 import com.nurflugel.hyperdoodle.Point
+import java.lang.StrictMath.toRadians
 import java.time.Instant
 import java.util.*
 import kotlin.math.sin
@@ -14,13 +15,13 @@ import kotlin.random.Random
  * To change this template use Options | File Templates.
  */
 class Locus(var x: Int, var y: Int) {
-    private var xPeriod: Int
-    private var yPeriod: Int
+    private var xPeriod: Double
+    private var yPeriod: Double
     private val rand = Random(Instant.now().nano)
 
     init {
-        xPeriod = rand.nextInt(MAX_PERIOD - MIN_PERIOD) + MIN_PERIOD
-        yPeriod = rand.nextInt(MAX_PERIOD - MIN_PERIOD) + MIN_PERIOD
+        xPeriod = (rand.nextInt(MAX_PERIOD - MIN_PERIOD) + MIN_PERIOD).toDouble()/1.2
+        yPeriod = (rand.nextInt(MAX_PERIOD - MIN_PERIOD) + MIN_PERIOD).toDouble()/1.2
     }
 
     /** Make the locus move on a periodic schedule - back and forth */
@@ -34,9 +35,9 @@ class Locus(var x: Int, var y: Int) {
 
         x = (screenCenter.x + xFactor * screenCenter.x).toInt()
         y = (screenCenter.y + yFactor * screenCenter.y).toInt()
-//        x = clip((x + sin(rand.nextDouble() * 10)*10).toInt(),screenWidth.toInt())
-//        y = clip((y + sin(rand.nextDouble() * 10)*10).toInt(),screenHeight.toInt())
-//        println("x: $x; y: $y")
+        //        x = clip((x + sin(rand.nextDouble() * 10)*10).toInt(),screenWidth.toInt())
+        //        y = clip((y + sin(rand.nextDouble() * 10)*10).toInt(),screenHeight.toInt())
+        //        println("x: $x; y: $y")
     }
 
     private fun clip(value: Int, maxValue: Int): Int {
@@ -47,15 +48,15 @@ class Locus(var x: Int, var y: Int) {
         }
     }
 
-    private fun getFactor(period: Int): Double {
+    private fun getFactor(period: Double): Double {
         //        val time = Instant.now().toEpochMilli()
         //        val n = time.toDouble() / period.toDouble()
         //        val s = sin(n + Math.PI * 2)
         val time = Date().time
-        val n = (time.toDouble()) / (period.toDouble())
-        val s = sin(n + (Math.PI * 2))
-
-//        return s * s
+        val n = (time.toDouble()) / period
+//        val s = sin(toRadians(n))
+                val s = sin(n + Math.PI * 2)
+//                return s * s
         return s
     }
 

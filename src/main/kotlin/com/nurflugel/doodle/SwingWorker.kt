@@ -16,19 +16,12 @@ import javax.swing.SwingUtilities
  */
 abstract class SwingWorker
 protected constructor() {
-    /**
-     * Get the value produced by the worker thread, or null if it
-     * hasn't been constructed yet.
-     */
-    /**
-     * Set the value produced by worker thread
-     */
+    /** Get the value produced by the worker thread, or null if it hasn't been constructed yet. */
+    /** Set the value produced by worker thread */
     @get:Synchronized
     @set:Synchronized
     protected var value: Any? = null // see getValue(), setValue()
-        /**
-         * Set the value produced by worker thread
-         */
+        /** Set the value produced by worker thread */
         private set
 
     private lateinit var threadVar: ThreadVar
@@ -38,15 +31,15 @@ protected constructor() {
      * and then exit.
      */
     init {
-        println("SwingWorker.SwingWorker")
+//        println("SwingWorker.SwingWorker")
 
         val doFinished = Runnable {
-            println("SwingWorker.run1")
+//            println("SwingWorker.run1")
             finished()
         }
 
         val doConstruct: Runnable = Runnable {
-            println("SwingWorker.run2")
+//            println("SwingWorker.run2")
 
             try {
                 value = construct()
@@ -71,7 +64,7 @@ protected constructor() {
      * Called on the event dispatching thread (not on the worker thread)
      * after the `construct` method has returned.
      */
-    fun finished() {}
+    private fun finished() {}
 
     /**
      * A new method that interrupts the worker thread.  Call this method
@@ -98,8 +91,7 @@ protected constructor() {
         println("SwingWorker.get")
 
         while (true) {
-            val t = threadVar.get()
-                    ?: return value
+            val t = threadVar.get() ?: return value
 
             try {
                 t.join()

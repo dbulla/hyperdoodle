@@ -124,7 +124,6 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         get() {
             val points = arrayOfNulls<Point>(sides.size * (numPointsPerSide - 1))
             var index = 0
-            var side: Side
 
             sides.forEach { element ->
 

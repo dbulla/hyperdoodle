@@ -23,21 +23,26 @@ import kotlin.Boolean
 import kotlin.Double
 import kotlin.Int
 import kotlin.Throws
-import kotlin.arrayOfNulls
 
 /**
  * Created by IntelliJ IDEA. User: Douglas Bullard Date: Oct 26, 2003 Time: 10:39:06 PM To change this template use Options | File Templates.
  */
-open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable  {
+open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable {
     var numSegmentsPerSpine: Int = 20
-    private lateinit var spines: Array<Spine?>
+    private lateinit var spines: Array<Spine>
     private var doodleWidth = 0
     private var doodleHeight = 0
     private var isPrinting = false
     private var numberOfSpines = 3
-    private var deltaAngle = 0.00000025// in degrees
+    private var deltaAngle = 0.00000025 // in degrees
     private var offsetAngle = deltaAngle // in degrees - avoid vertical line at start
-    private var worker: SwingWorker? = null
+    private lateinit var worker: SwingWorker
+    private val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
+    private var isRotating: Boolean = false
+
+    init {
+        hintsMap[KEY_ANTIALIASING] = VALUE_ANTIALIAS_ON
+    }
 
     @Throws(PrinterException::class)
     override fun print(
@@ -48,7 +53,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         if (pageIndex >= 1) {
             return NO_SUCH_PAGE;
         }
-
         val graphics2D = graphics as Graphics2D
 
         //            pageFormat.setOrientation(PageFormat.LANDSCAPE);
@@ -65,24 +69,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         return (PAGE_EXISTS)
     }
 
-    fun drawSpines(g: Graphics) {
-        println("HyperDoodlePanel.drawSpines")
-
-        val graphics2D = g as Graphics2D
-        val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
-
-        hintsMap[KEY_ANTIALIASING] = VALUE_ANTIALIAS_ON
-        graphics2D.addRenderingHints(hintsMap)
-
-        spines.filterNotNull()
-            .map { it.points }
-            .forEach { points ->
-                val startPoint = points[0]!!
-                val endPoint = points[points.size - 1]!!
-                g.drawLine(startPoint.x.toInt(), startPoint.y.toInt(), endPoint.x.toInt(), endPoint.y.toInt())
-            }
-    }
-
     override fun getBackground(): Color {
         val backgroundColor: Color = when {
             isPrinting                    -> Color.white
@@ -93,22 +79,36 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         return backgroundColor
     }
 
+    fun makeRotate() {
+        if(!isRotating) {
+            isRotating = true
+            worker = object : SwingWorker() {
+                override fun construct(): Any {
+                    while (isRotating) {
+                        repaint()
+                        offsetAngle += 0.000000125
+                        //                                        Thread.sleep(1)
+                    }
+                    return 0
+                }
+            }
+            worker.start()
+        }
+    }
+
+    fun stopRotating() {
+        isRotating = false
+    }
+
+
     override fun paint(g: Graphics) {
         super.paint(g)
         val graphics2D = g as Graphics2D
-        val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
-
-        hintsMap[KEY_ANTIALIASING] = VALUE_ANTIALIAS_ON
         graphics2D.addRenderingHints(hintsMap)
 
         val origXform = graphics2D.transform
         val newXform = (origXform.clone()) as AffineTransform
-
-        // int xRot = getWidth() / 2;
-        // int yRot = getHeight() / 2;
         val center: Point = initializePoints(offsetAngle)
-
-        // Point center = initializePoints(initialAngle + offsetAngle);
         newXform.rotate(Math.toRadians(offsetAngle), center.x, center.y)
 
         isPrinting = theFrame.isPrinting
@@ -127,25 +127,20 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         // for three spines, draw webs between 1-3, 2-2, and 3-1
         (0..<numberOfSpines).forEach { i ->
             val j = (i + 1) % numberOfSpines
-
-//            println("i = $i, j = $j, spines[i] = ${spines[i]}, spines[j] = ${spines[j]}")
-            if(spines[i]!=null && spines[j] !=null)
-            drawFilledWeb(g, spines[i]!!, spines[j]!!)
+            drawFilledWeb(g, spines[i], spines[j])
         }
 
-        drawFilledWeb(g, spines[0]!!, spines[1]!!)
+        drawFilledWeb(g, spines[0], spines[1])
     }
 
     private fun drawFilledWeb(g: Graphics2D, spine1: Spine, spine2: Spine) {
-        val lines: Array<Line?> = arrayOfNulls(numSegmentsPerSpine + 2)
-        lines[0] = spine1.getLine()
-        (numSegmentsPerSpine downTo 1).forEach { i ->
-            val point1: Point = spine1.points[i]!!
-            val point2: Point = spine2.points[numSegmentsPerSpine - i + 1]!!
-
-            lines[numSegmentsPerSpine - i + 1] = Line(Point(point1.x, point1.y), Point(point2.x, point2.y))
+        val lineList = (numSegmentsPerSpine downTo 1).map { i ->
+            val point1: Point = spine1.points[i]
+            val point2: Point = spine2.points[numSegmentsPerSpine - i + 1]
+            Line(Point(point1.x, point1.y), Point(point2.x, point2.y))
         }
-        lines[numSegmentsPerSpine + 1] = spine2.getLine()
+
+        val lines= (mutableListOf(spine1.getLine()) + lineList + spine2.getLine()).toTypedArray()
 
         (0..<(lines.size - 2)).forEach { i ->
             // special case - point s0 and s1
@@ -153,12 +148,11 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
             // adjust offset so no lines are truly vertical
 
             // special case for first polygon, which is always a triangle
-            splitAndDrawTriangle(g, lines[i]!!, lines[i + 1]!!, lines[i + 2]!!)
+            splitAndDrawTriangle(g, lines[i], lines[i + 1], lines[i + 2])
 
             // now iterate through the remaining lines
             (i + 1..<(lines.size - 1)).forEach { j ->
-                // todo test for last i, last j (will be a triangle)
-                splitAndDrawPolygon(g, lines[i]!!, lines[i + 1]!!, lines[j]!!, lines[j + 1]!!)
+                splitAndDrawPolygon(g, lines[i], lines[i + 1], lines[j], lines[j + 1])
             }
         }
     }
@@ -176,13 +170,13 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         line3: Line,
         line4: Line,
     ) {
-        val points = arrayOfNulls<Point>(4)
-        points[0] = line1.findIntercept(line3)
-        points[1] = line1.findIntercept(line4)
-        points[2] = line2.findIntercept(line3)
-        points[3] = line2.findIntercept(line4)
-        drawTriangle(g, points[0]!!, points[1]!!, points[2]!!, true)
-        drawTriangle(g, points[1]!!, points[2]!!, points[3]!!, false)
+        val intercept13 = line1.findIntercept(line3)
+        val intercept14 = line1.findIntercept(line4)
+        val intercept23 = line2.findIntercept(line3)
+        val intercept24 = line2.findIntercept(line4)
+        val points: Array<Point> = arrayOf(intercept13, intercept14, intercept23, intercept24)
+        drawTriangle(g, points[0], points[1], points[2], true)
+        drawTriangle(g, points[1], points[2], points[3], false)
     }
 
 
@@ -210,7 +204,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         fillTriangle: Boolean,
     ) {
         // set the start
-
         val p1x = firstPoint.x
         val p1y = firstPoint.y
         val p2y = secondPoint.y
@@ -218,8 +211,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         val p3x = intersectionPoint.x
         val p3y = intersectionPoint.y
 
-        // todo why was this check needed?
-        //        if (!Double.(p1x) && !Float.isNaN(p1y) && !Float.isNaN(p2x) && !Float.isNaN(p2y) && !Float.isNaN(p3x) && !Float.isNaN(p3y)) {
         val path = GeneralPath()
 
         path.moveTo(p1x, p1y)
@@ -235,21 +226,18 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         else {
             g.draw(path)
         }
-        //        }
     }
 
     /** angles are in degrees */
-    fun initializePoints(initialAngle: Double): Point {
+    private fun initializePoints(initialAngle: Double): Point {
         val centerX = ((doodleWidth + (2 * XOFFSET)) / 2).toDouble()
         val centerY = ((doodleHeight + (2 * YOFFSET)) / 2).toDouble() //+200
         val center = Point(centerX, centerY)
-        spines = arrayOfNulls(numberOfSpines)
-
-        (0..<numberOfSpines).forEach { spineNumber ->
+        spines = (0..<numberOfSpines).map { spineNumber ->
             val angle = (360.0 / numberOfSpines * spineNumber) + initialAngle - 90
-//            println("angle = $angle")
-            spines[spineNumber] = Spine(center, centerY, angle, numSegmentsPerSpine)
-        }
+            Spine(center, centerY, angle, numSegmentsPerSpine)
+        }.toTypedArray()
+
         return center
     }
 
@@ -286,31 +274,9 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         this.numberOfSpines = numberOfSpines
     }
 
-    fun makeRotate() {
-
-        worker = object : SwingWorker() {
-            override fun construct(): Any {
-                while (true) {
-//                    initializePoints(offsetAngle)
-                    repaint()
-                    offsetAngle+=0.00000025
-//                    Thread.sleep(1)
-                }
-
-                return "Success" // return value not used by this program
-            }
-        }
-        worker?.start()
-
-    }
-    fun stopRotating() {
-        worker?.interrupt()
-    }
 
     companion object {
         const val XOFFSET: Int = 10
         const val YOFFSET: Int = 10
-        const val DRAW_POINTS: Boolean = false
-        const val DRAW_POINT_COORDINATES: Boolean = false
     }
 }

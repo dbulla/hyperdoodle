@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.JFrame
 import java.awt.print.Printable
+import kotlin.system.exitProcess
 
 /** Main holding frame for the application.  */
 class HyperDoodleFrame : JFrame() {
@@ -64,21 +65,14 @@ class HyperDoodleFrame : JFrame() {
                 }
             })
         } finally {
-//            if (useFullScreenMode) {
-//                screen.fullScreenWindow = null
-//            }
         }
     }
 
 
     private fun exitForm() {
-        System.exit(0)
+        exitProcess(0)
     }
 
-    // public void setNumPointsPerSide(final int numPoints)
-    // {
-    // hyperDoodlePanel.setNumPointsPerSpine(numPoints);
-    // }
     fun invertControlPanelVisibility() {
         controlPanel.isVisible = !controlPanel.isVisible
     }
