@@ -27,15 +27,14 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     private var doodleHeight = 0
     private var isPrinting = false
     private var numPointsPerSide: Int = ControlPanelUIManager.INITIAL_POINTS_VALUE
-    private lateinit var sides: Array<Side?>
+    private lateinit var sides: Array<Side>
     private var locusList: MutableList<Locus> = mutableListOf()
     private var selectedLocus: Locus? = null
-    private var worker: SwingWorker? = null
+    private lateinit var worker: SwingWorker
 
     companion object {
         private const val LOCUS_POINT_RADIUS: Int = 10
         private const val MIN_LOCUS_DISTANCE: Int = 25
-        private const val NUM_SIDES = 4
 
         //        const val XOFFSET = 10
         //        const val YOFFSET = 10
@@ -46,7 +45,6 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     init {
         addMouseListener(this)
         addMouseMotionListener(this)
-
     }
 
     fun wander() {
@@ -68,11 +66,11 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
                 return "Success" // return value not used by this program
             }
         }
-        worker?.start()
+        worker.start()
     }
 
     fun stopWandering() {
-        worker?.interrupt()
+        theFrame.setWandering(false)
     }
 
     @Throws(PrinterException::class)
@@ -92,7 +90,6 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     private fun drawInnerStuffForLocus(graphicsD: Graphics, locus: Locus) {
         val graphics2D = graphicsD as Graphics2D
-        //        val points = points
         val numPoints = points.size
         val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
 
@@ -105,14 +102,14 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
             path.moveTo(locus.x.toDouble(), locus.y.toDouble())
 
             var point = points[i]
-            path.lineTo(point!!.x.toFloat(), point.y.toFloat())
+            path.lineTo(point.x.toFloat(), point.y.toFloat())
 
             point = when (i) {
                 numPoints - 1 -> points[0]
                 else          -> points[i + 1]
             }
 
-            path.lineTo(point!!.x.toFloat(), point.y.toFloat())
+            path.lineTo(point.x.toFloat(), point.y.toFloat())
             path.closePath()
             graphics2D.setXORMode(background)
             graphics2D.fill(path)
@@ -120,22 +117,12 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         }
     }
 
-    private val points: Array<Point?>
+    private val points: Array<Point>
         get() {
-            val points = arrayOfNulls<Point>(sides.size * (numPointsPerSide - 1))
-            var index = 0
-
-            sides.forEach { element ->
-
-                val sidePoints: Array<Point?> = element!!.points
-
-                sidePoints.indices.forEach { pointNumber ->
-                    points[index] = sidePoints[pointNumber]
-                    index++
-                }
-            }
-
-            return points
+            return sides
+                .map { it.points.toList() }
+                .flatten()
+                .toTypedArray<Point>()
         }
 
     /** Invoked when the mouse button has been clicked (pressed and released) on a component.  */
@@ -290,11 +277,11 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     /** Create the points around the perimeter of the drawing */
     private fun initializePoints() {
-        sides = arrayOfNulls(NUM_SIDES)
-        sides[0] = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
-        sides[1] = Side(Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), numPointsPerSide)
-        sides[2] = Side(Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight), numPointsPerSide)
-        sides[3] = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
+        val sides0 = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
+        val sides1 = Side(Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), numPointsPerSide)
+        val sides2 = Side(Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight), numPointsPerSide)
+        val sides3 = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
+        sides = arrayOf(sides0, sides1, sides2, sides3)
     }
 
     override fun paint(g: Graphics) {

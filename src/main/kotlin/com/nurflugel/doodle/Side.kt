@@ -12,11 +12,11 @@ import com.nurflugel.hyperdoodle.Point
  */
 class Side
     (
-    private val startPoint: Point,
-    private val endPoint: Point,
+    startPoint: Point,
+    endPoint: Point,
     numPointsPerSide: Int,
 ) {
-    val points: Array<Point?>
+    var points: Array<Point>
 
     //	private float segmentLength;
     private val numPointsPerSide: Int
@@ -24,20 +24,17 @@ class Side
     init {
         val deltaX = endPoint.x - startPoint.x
         val deltaY = endPoint.y - startPoint.y
-
-        //		segmentLength = (float) Math.sqrt(deltaX*deltaX+deltaY*deltaY);
         this.numPointsPerSide = numPointsPerSide
-        points = arrayOfNulls(numPointsPerSide - 1)
 
         val xIncrement = deltaX / (numPointsPerSide - 1).toDouble()
         val yIncrement = deltaY / (numPointsPerSide - 1).toDouble()
         var x: Double
         var y: Double
 
-        for (i in 0..<(numPointsPerSide - 1)) {
+        points = (0..<(numPointsPerSide - 1)).map { i ->
             x = startPoint.x + (xIncrement * i.toDouble())
             y = startPoint.y + (yIncrement * i.toDouble())
-            points[i] = Point(x, y)
-        }
+            Point(x, y)
+        }.toTypedArray()
     }
 }

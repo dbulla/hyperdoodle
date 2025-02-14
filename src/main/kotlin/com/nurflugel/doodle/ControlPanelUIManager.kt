@@ -30,7 +30,7 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private lateinit var radioButtonPanel: JPanel
     private lateinit var removeLocusPointsRadioButton: JRadioButton
     private lateinit var fixedModeRadioButton: JRadioButton
-    private lateinit var wanderModeRadioButton: JRadioButton
+    lateinit var wanderModeRadioButton: JRadioButton
     var isPrinting: Boolean = false
         private set
     private lateinit var contentPanel: JPanel

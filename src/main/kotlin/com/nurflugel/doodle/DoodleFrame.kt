@@ -104,6 +104,10 @@ class DoodleFrame : JFrame() {
         return doodlePanel
     }
 
+    fun setWandering(b: Boolean) {
+        controlPanel.wanderModeRadioButton.isSelected=b
+    }
+
     val isPrinting: Boolean
         get() = controlPanel.isPrinting
 
