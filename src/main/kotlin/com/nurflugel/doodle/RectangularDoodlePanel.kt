@@ -1,5 +1,6 @@
 package com.nurflugel.doodle
 
+import com.nurflugel.doodle.ControlPanelUIManager.Companion.INITIAL_POINTS_VALUE
 import com.nurflugel.hyperdoodle.Point
 import java.awt.Color
 import java.awt.Graphics
@@ -16,18 +17,14 @@ import java.awt.print.PrinterException
 import javax.swing.JPanel
 
 /**
- * Created by IntelliJ IDEA.
- * User: Douglas Bullard
- * Date: Oct 26, 2003
- * Time: 4:21:22 PM
- * To change this template use Options | File Templates.
+ * todo - make rectangular, square, triangular, pentagonal, hexagonal, etc.  Option to make sides equal.
  */
 class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseListener, MouseMotionListener, Printable {
     private var doodleWidth = 0
     private var doodleHeight = 0
-    private var isPrinting = false
-    private var numPointsPerSide: Int = ControlPanelUIManager.INITIAL_POINTS_VALUE
-    private lateinit var sides: Array<Side>
+//    private var isPrinting = false
+    private var numPointsPerSide: Int = INITIAL_POINTS_VALUE
+    private lateinit var sides: Array<Side> // todo why an array, and not a list???
     private var locusList: MutableList<Locus> = mutableListOf()
     private var selectedLocus: Locus? = null
     private lateinit var worker: SwingWorker
@@ -59,10 +56,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
                     if (locusList.isNotEmpty()) {
                         (0..<locusListSize).forEach { locusList[it].wander(screenWidth, screenHeight, screenCenter) }
                     }
-
                     repaint()
                 }
-
                 return "Success" // return value not used by this program
             }
         }
@@ -71,6 +66,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     fun stopWandering() {
         theFrame.setWandering(false)
+        worker.interrupt()
     }
 
     @Throws(PrinterException::class)
@@ -88,8 +84,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         return Printable.PAGE_EXISTS
     }
 
-    private fun drawInnerStuffForLocus(graphicsD: Graphics, locus: Locus) {
-        val graphics2D = graphicsD as Graphics2D
+    private fun drawInnerStuffForLocus(graphics2D: Graphics2D, locus: Locus) {
         val numPoints = points.size
         val hintsMap: MutableMap<RenderingHints.Key, Any> = mutableMapOf()
 
@@ -120,7 +115,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     private val points: Array<Point>
         get() {
             return sides
-                .map { it.points.toList() }
+                .map { it.points }
+                .map { it.toList() }
                 .flatten()
                 .toTypedArray<Point>()
         }
@@ -129,7 +125,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     override fun mouseClicked(e: MouseEvent) {
         // check to see if full screen mode is requested
         if (e.isMetaDown) {
-            theFrame.setFullScreen(!theFrame.isFullScreen())
+           theFrame.invertControlPanelVisibility() // use the OS full screen mechanism
+//            theFrame.setFullScreen(!theFrame.isFullScreen())
         }
         else {
             if (theFrame.isAddLocusMode) {
@@ -138,8 +135,10 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
                 locusList.add(newLocus)
                 initializePoints()
-                stopWandering()
-                wander()
+                if(theFrame.isWandering) {
+                    stopWandering()
+                    wander()
+                }
             }
             else {
                 val x = e.x
@@ -244,21 +243,17 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         }
     }
 
-    private fun drawLocusPoint(
-        g: Graphics,
-        locus: Locus,
-    ) {
-
+    private fun drawLocusPoint(graphics2D: Graphics2D, locus: Locus) {
         if (theFrame.isMoveLocusMode) {
             val theSelectedLocus: Locus? = getSelectedLocus()
 
             if (locus == theSelectedLocus) {
-                g.setPaintMode()
+                graphics2D.setPaintMode()
 
-                val oldColor = g.color
+                val oldColor = graphics2D.color
 
-                g.color = Color.red
-                g.fillArc(
+                graphics2D.color = Color.red
+                graphics2D.fillArc(
                     locus.x - (LOCUS_POINT_RADIUS / 2),
                     locus.y - (LOCUS_POINT_RADIUS / 2),
                     LOCUS_POINT_RADIUS,
@@ -266,7 +261,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
                     0,
                     360
                 )
-                g.color = oldColor
+                graphics2D.color = oldColor
             }
         }
     }
@@ -285,25 +280,25 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     }
 
     override fun paint(g: Graphics) {
+        val graphics2D = g as Graphics2D
         var locus: Locus
 
-        isPrinting = theFrame.isPrinting
+//        isPrinting = theFrame.isPrinting
         doodleWidth = width - (2 * XOFFSET)
         doodleHeight = height - (2 * YOFFSET)
         initializePoints()
 
-        drawBounds(g)
+        drawBounds(graphics2D)
 
         (0..<locusList.size).forEach { i ->
             locus = locusList[i]
-            drawInnerStuffForLocus(g, locus)
-            drawLocusPoint(g, locus)
+            drawInnerStuffForLocus(graphics2D, locus)
+            drawLocusPoint(graphics2D, locus)
         }
-        drawBorder(g)
+        drawBorder(graphics2D)
     }
 
-    private fun drawBorder(g: Graphics) {
-        val graphics2D = g as Graphics2D
+    private fun drawBorder(graphics2D: Graphics2D) {
         graphics2D.setPaintMode()
         graphics2D.color = foreground
 
@@ -320,8 +315,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
         graphics2D.fill(rectangle)
     }
 
-    private fun drawBounds(g: Graphics): Graphics2D {
-        val graphics2D = g as Graphics2D
+    @Suppress("DuplicatedCode")
+    private fun drawBounds(graphics2D: Graphics2D): Graphics2D {
         var rectangle = Rectangle(0, 0, doodleWidth + (2 * XOFFSET), doodleHeight + (2 * YOFFSET))
 
         graphics2D.fill(rectangle)
@@ -337,12 +332,13 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     }
 
     override fun getBackground(): Color {
-        val background = when {
+        var background = when {
             super.getBackground() == null -> Color.white
-            !isPrinting                   -> super.getBackground()
+//            !isPrinting                   -> super.getBackground()
             else                          -> Color.white
         }
-
+        background=Color.red
+//        println("background = ${background}")
         return background
     }
 }

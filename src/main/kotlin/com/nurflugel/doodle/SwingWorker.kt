@@ -38,7 +38,7 @@ protected constructor() {
             finished()
         }
 
-        val doConstruct: Runnable = Runnable {
+        val doConstruct = Runnable {
 //            println("SwingWorker.run2")
 
             try {

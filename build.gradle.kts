@@ -23,7 +23,7 @@ repositories {
 dependencies {
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.0-RC1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.0-RC2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // This dependency is used by the application.
@@ -37,8 +37,8 @@ kotlin {
 
 application {
     // Define the main class for the application.
-    mainClass = "com.nurflugel.hyperdoodle.HyperDoodleFrame"
-//    mainClass = "com.nurflugel.doodle.DoodleFrame"
+//    mainClass = "com.nurflugel.hyperdoodle.HyperDoodleFrame"
+    mainClass = "com.nurflugel.doodle.DoodleFrame"
 }
 
 tasks.named<Test>("test") {

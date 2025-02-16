@@ -36,6 +36,7 @@ class DoodleFrame : JFrame() {
             contentPane.add(EAST, controlPanel)
 
             size = Toolkit.getDefaultToolkit().screenSize
+//            size = Dimension(800,300)
 
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent) {
@@ -48,21 +49,21 @@ class DoodleFrame : JFrame() {
         }
     }
 
-    fun setFullScreen(shouldSet: Boolean): GraphicsDevice? {
-        controlPanel.isVisible = !shouldSet
-        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val device = env.defaultScreenDevice
-        device.fullScreenWindow = if (shouldSet) this else null
-        return device
-    }
-
-    fun isFullScreen(): Boolean {
-        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val gd = ge.defaultScreenDevice
-        val isFullScreen = gd.fullScreenWindow != null
-        println("isFullScreen = $isFullScreen")
-        return isFullScreen
-    }
+//    fun setFullScreen(shouldSet: Boolean): GraphicsDevice? {
+//        controlPanel.isVisible = !shouldSet
+//        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
+//        val device = env.defaultScreenDevice
+//        device.fullScreenWindow = if (shouldSet) this else null
+//        return device
+//    }
+//
+//    fun isFullScreen(): Boolean {
+//        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+//        val gd = ge.defaultScreenDevice
+//        val isFullScreen = gd.fullScreenWindow != null
+//        println("isFullScreen = $isFullScreen")
+//        return isFullScreen
+//    }
 
     @Synchronized
     fun stop() {
@@ -100,7 +101,7 @@ class DoodleFrame : JFrame() {
         controlPanel.isVisible = !currentVisibility
     }
 
-    fun getDoodlePanel(): Printable {
+    fun getDoodlePanel(): Component {
         return doodlePanel
     }
 
@@ -108,8 +109,8 @@ class DoodleFrame : JFrame() {
         controlPanel.wanderModeRadioButton.isSelected=b
     }
 
-    val isPrinting: Boolean
-        get() = controlPanel.isPrinting
+//    val isPrinting: Boolean
+//        get() = controlPanel.isPrinting
 
     companion object {
         @JvmStatic

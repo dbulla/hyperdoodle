@@ -1,9 +1,13 @@
 package com.nurflugel.doodle
 
 import java.awt.*
+import java.awt.Font.PLAIN
 import java.awt.GridBagConstraints.HORIZONTAL
 import java.awt.event.MouseWheelEvent
-import java.awt.print.PrinterJob
+import java.awt.image.BufferedImage
+import java.awt.image.BufferedImage.TYPE_INT_RGB
+import java.io.File
+import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.BoxLayout.Y_AXIS
 import javax.swing.border.EtchedBorder
@@ -31,8 +35,8 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private lateinit var removeLocusPointsRadioButton: JRadioButton
     private lateinit var fixedModeRadioButton: JRadioButton
     lateinit var wanderModeRadioButton: JRadioButton
-    var isPrinting: Boolean = false
-        private set
+//    var isPrinting: Boolean = false
+//        private set
     private lateinit var contentPanel: JPanel
 
     /**
@@ -153,19 +157,36 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     }
 
     private fun printScreen() {
-        val printJob = PrinterJob.getPrinterJob()
+        //        val printJob = PrinterJob.getPrinterJob()
+        //
+        //        printJob.setPrintable(doodleFrame.getDoodlePanel())
+        //
+        //        if (printJob.printDialog()) {
+        //            try {
+        //                isPrinting = true
+        //                printJob.print()
+        //                isPrinting = false
+        //            } catch (ex: Exception) {
+        //                ex.printStackTrace()
+        //            }
+        //        }
+        val WIDTH = 2560
+        val HEIGHT = 1440
+        val localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        val bufferedImage = BufferedImage(WIDTH, HEIGHT, TYPE_INT_RGB)
+        val graphics2D = localGraphicsEnvironment.createGraphics(bufferedImage)
 
-        printJob.setPrintable(doodleFrame.getDoodlePanel())
+        val doodlePanel = doodleFrame.getDoodlePanel()
+        graphics2D.clearRect(0, 0, WIDTH, HEIGHT)
+        //        graphics2D.setRenderingHints(aliasedRenderingHints) // todo get this is it works
+        graphics2D.font = Font("Helvetica", PLAIN, 13)
 
-        if (printJob.printDialog()) {
-            try {
-                isPrinting = true
-                printJob.print()
-                isPrinting = false
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
+        val bImg = BufferedImage(doodlePanel.width, doodlePanel.height, TYPE_INT_RGB)
+        val cg = bImg.createGraphics()
+        doodlePanel.paintAll(cg)
+//        doodlePanel.paint(cg)
+        val imageFile = File("dibble2.png")
+        ImageIO.write(bufferedImage, "png", imageFile)
     }
 
     private fun numPointsSpinnerMouseWheelMoved(e: MouseWheelEvent) {
