@@ -24,7 +24,8 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
     private var doodleHeight = 0
 //    private var isPrinting = false
     private var numPointsPerSide: Int = INITIAL_POINTS_VALUE
-    private lateinit var sides: Array<Side> // todo why an array, and not a list???
+    private var NUMBER_OF_SIDES = 4
+    private lateinit var sides: List<Side> // todo why an array, and not a list???
     private var locusList: MutableList<Locus> = mutableListOf()
     private var selectedLocus: Locus? = null
     private lateinit var worker: SwingWorker
@@ -35,7 +36,7 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
         //        const val XOFFSET = 10
         //        const val YOFFSET = 10
-        const val XOFFSET = 0
+        const val XOFFSET = 0 // no border offset
         const val YOFFSET = 0
     }
 
@@ -272,11 +273,24 @@ class RectangularDoodlePanel(val theFrame: DoodleFrame) : JPanel(true), MouseLis
 
     /** Create the points around the perimeter of the drawing */
     private fun initializePoints() {
+        // for regular polyhedrons, find the center of the square with 0,0 at the corner,
+        // then create points at regular angles, every 360/n degrees with radius of 1/2 height.
+        //
+        // For "full width" polygons, keep the boundary of the panel, (whatever it may be), and
+        // project intersections with the regular angles and the boundary of the panel.
+        // todo - third option - a circular canvas.  This pretty much has to have a border.
+
+        // radio buttons - square, rectangular (panel width), or round
+
+
         val sides0 = Side(Point(XOFFSET, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET), numPointsPerSide)
         val sides1 = Side(Point(XOFFSET + doodleWidth, YOFFSET), Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), numPointsPerSide)
         val sides2 = Side(Point(XOFFSET + doodleWidth, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET + doodleHeight), numPointsPerSide)
         val sides3 = Side(Point(XOFFSET, YOFFSET + doodleHeight), Point(XOFFSET, YOFFSET), numPointsPerSide)
-        sides = arrayOf(sides0, sides1, sides2, sides3)
+        sides = listOf(sides0, sides1, sides2, sides3)
+//
+//        val circularSide=CircularSide(doodleHeight/2.0, Point(doodleWidth/2.0, doodleHeight/2.0),numPointsPerSide)
+//        sides = listOf(circularSide)
     }
 
     override fun paint(g: Graphics) {

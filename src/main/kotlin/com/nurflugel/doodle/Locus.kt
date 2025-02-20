@@ -35,9 +35,6 @@ class Locus(var x: Int, var y: Int) {
 
         x = (screenCenter.x + xFactor * screenCenter.x).toInt()
         y = (screenCenter.y + yFactor * screenCenter.y).toInt()
-        //        x = clip((x + sin(rand.nextDouble() * 10)*10).toInt(),screenWidth.toInt())
-        //        y = clip((y + sin(rand.nextDouble() * 10)*10).toInt(),screenHeight.toInt())
-        //        println("x: $x; y: $y")
     }
 
     private fun clip(value: Int, maxValue: Int): Int {
@@ -49,14 +46,9 @@ class Locus(var x: Int, var y: Int) {
     }
 
     private fun getFactor(period: Double): Double {
-        //        val time = Instant.now().toEpochMilli()
-        //        val n = time.toDouble() / period.toDouble()
-        //        val s = sin(n + Math.PI * 2)
         val time = Date().time
         val n = (time.toDouble()) / period
-//        val s = sin(toRadians(n))
                 val s = sin(n + Math.PI * 2)
-//                return s * s
         return s
     }
 
