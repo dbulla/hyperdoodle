@@ -35,8 +35,9 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
     private lateinit var removeLocusPointsRadioButton: JRadioButton
     private lateinit var fixedModeRadioButton: JRadioButton
     lateinit var wanderModeRadioButton: JRadioButton
-//    var isPrinting: Boolean = false
-//        private set
+
+    //    var isPrinting: Boolean = false
+    //        private set
     private lateinit var contentPanel: JPanel
 
     /**
@@ -184,7 +185,7 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         val bImg = BufferedImage(doodlePanel.width, doodlePanel.height, TYPE_INT_RGB)
         val cg = bImg.createGraphics()
         doodlePanel.paintAll(cg)
-//        doodlePanel.paint(cg)
+        //        doodlePanel.paint(cg)
         val imageFile = File("dibble2.png")
         ImageIO.write(bufferedImage, "png", imageFile)
     }
@@ -212,6 +213,6 @@ class ControlPanelUIManager(doodleFrame: DoodleFrame) : JPanel(BorderLayout()) {
         get() = removeLocusPointsRadioButton.isSelected // End of variables declaration//GEN-END:variables
 
     companion object {
-        const val INITIAL_POINTS_VALUE=40
+        const val INITIAL_POINTS_VALUE = 40
     }
 }

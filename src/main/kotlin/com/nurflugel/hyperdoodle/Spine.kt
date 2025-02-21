@@ -13,7 +13,7 @@ class Spine
     private val angle: Double,
     private val numPointsPerSide: Int,
 ) {
-    var points: Array<Point>
+    var points: List<Point>
 
     init {
         val angleInRadians = Math.toRadians(angle)
@@ -23,7 +23,7 @@ class Spine
             val x = center.x + (deltaLength * i * StrictMath.cos(angleInRadians))
             val y = center.y + (deltaLength * i * StrictMath.sin(angleInRadians))
             Point(x, y)
-        }.toTypedArray()
+        }
     }
 
     fun getLine(): Line {

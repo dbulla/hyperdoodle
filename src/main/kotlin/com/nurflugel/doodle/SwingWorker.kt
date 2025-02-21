@@ -31,15 +31,15 @@ protected constructor() {
      * and then exit.
      */
     init {
-//        println("SwingWorker.SwingWorker")
+        //        println("SwingWorker.SwingWorker")
 
         val doFinished = Runnable {
-//            println("SwingWorker.run1")
+            //            println("SwingWorker.run1")
             finished()
         }
 
         val doConstruct = Runnable {
-//            println("SwingWorker.run2")
+            //            println("SwingWorker.run2")
 
             try {
                 value = construct()
@@ -91,7 +91,8 @@ protected constructor() {
         println("SwingWorker.get")
 
         while (true) {
-            val t = threadVar.get() ?: return value
+            val t = threadVar.get()
+                    ?: return value
 
             try {
                 t.join()

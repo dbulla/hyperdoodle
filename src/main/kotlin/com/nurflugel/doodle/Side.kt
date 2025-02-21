@@ -10,7 +10,7 @@ open class Side
     endPoint: Point,
     numPointsPerSide: Int,
 ) {
-    constructor() : this(Point(0.0,0.0),Point(0.0,0.0), numPointsPerSide=0)
+    constructor() : this(Point(0.0, 0.0), Point(0.0, 0.0), numPointsPerSide = 0)
 
     var points: List<Point>
 

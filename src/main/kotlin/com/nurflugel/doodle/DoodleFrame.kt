@@ -13,6 +13,9 @@ class DoodleFrame : JFrame() {
     private var controlPanel: ControlPanelUIManager
     private var useFullScreenMode = false
 
+    private var defaultScreenSize = Toolkit.getDefaultToolkit().screenSize
+    //    private var defaultScreenSize = Dimension(800, 300)
+
     init {
         val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
         val screen = graphicsEnvironment.defaultScreenDevice
@@ -35,8 +38,7 @@ class DoodleFrame : JFrame() {
             contentPane.add(CENTER, doodlePanel)
             contentPane.add(EAST, controlPanel)
 
-            size = Toolkit.getDefaultToolkit().screenSize
-//            size = Dimension(800,300)
+            size = defaultScreenSize
 
             addWindowListener(object : WindowAdapter() {
                 override fun windowClosing(evt: WindowEvent) {
@@ -48,22 +50,6 @@ class DoodleFrame : JFrame() {
 
         }
     }
-
-//    fun setFullScreen(shouldSet: Boolean): GraphicsDevice? {
-//        controlPanel.isVisible = !shouldSet
-//        val env = GraphicsEnvironment.getLocalGraphicsEnvironment()
-//        val device = env.defaultScreenDevice
-//        device.fullScreenWindow = if (shouldSet) this else null
-//        return device
-//    }
-//
-//    fun isFullScreen(): Boolean {
-//        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-//        val gd = ge.defaultScreenDevice
-//        val isFullScreen = gd.fullScreenWindow != null
-//        println("isFullScreen = $isFullScreen")
-//        return isFullScreen
-//    }
 
     @Synchronized
     fun stop() {
@@ -106,11 +92,8 @@ class DoodleFrame : JFrame() {
     }
 
     fun setWandering(b: Boolean) {
-        controlPanel.wanderModeRadioButton.isSelected=b
+        controlPanel.wanderModeRadioButton.isSelected = b
     }
-
-//    val isPrinting: Boolean
-//        get() = controlPanel.isPrinting
 
     companion object {
         @JvmStatic

@@ -29,7 +29,7 @@ import kotlin.Throws
  */
 open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), Printable {
     var numSegmentsPerSpine: Int = 20
-    private lateinit var spines: Array<Spine>
+    private lateinit var spines: List<Spine>
     private var doodleWidth = 0
     private var doodleHeight = 0
     private var isPrinting = false
@@ -86,7 +86,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
                 override fun construct(): Any {
                     while (isRotating) {
                         repaint()
-                        offsetAngle += 0.000000125
+                        offsetAngle += 0.000000125  // a non-zero but small angle to avoid infinite slopes
                         //                                        Thread.sleep(1)
                     }
                     return 0
@@ -100,7 +100,6 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         isRotating = false
     }
 
-
     override fun paint(g: Graphics) {
         super.paint(g)
         val graphics2D = g as Graphics2D
@@ -108,7 +107,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
 
         val origXform = graphics2D.transform
         val newXform = (origXform.clone()) as AffineTransform
-        val center: Point = initializePoints(offsetAngle)
+        val center: Point = initializePoints(offsetAngle) // todo do this only once
         newXform.rotate(Math.toRadians(offsetAngle), center.x, center.y)
 
         isPrinting = theFrame.isPrinting
@@ -236,7 +235,7 @@ open class HyperDoodlePanel(private val theFrame: HyperDoodleFrame) : JPanel(), 
         spines = (0..<numberOfSpines).map { spineNumber ->
             val angle = (360.0 / numberOfSpines * spineNumber) + initialAngle - 90
             Spine(center, centerY, angle, numSegmentsPerSpine)
-        }.toTypedArray()
+        }
 
         return center
     }
