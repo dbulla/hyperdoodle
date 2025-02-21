@@ -1,6 +1,6 @@
 package com.nurflugel.hyperdoodle
 
-import com.nurflugel.doodle.SwingWorker
+import com.nurflugel.hyperdoodle.SwingWorker
 import java.awt.Graphics2D
 import java.awt.Graphics
 import java.awt.Color

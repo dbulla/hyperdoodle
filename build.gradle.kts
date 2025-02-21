@@ -37,8 +37,7 @@ kotlin {
 
 application {
     // Define the main class for the application.
-//    mainClass = "com.nurflugel.hyperdoodle.HyperDoodleFrame"
-    mainClass = "com.nurflugel.doodle.DoodleFrame"
+    mainClass = "com.nurflugel.hyperdoodle.HyperDoodleFrame"
 }
 
 tasks.named<Test>("test") {

@@ -1,4 +1,4 @@
-package com.nurflugel.doodle
+package com.nurflugel.hyperdoodle
 
 import javax.swing.SwingUtilities
 
@@ -24,23 +24,18 @@ protected constructor() {
         /** Set the value produced by worker thread */
         private set
 
-    private lateinit var threadVar: ThreadVar
+    private var threadVar: ThreadVar
 
     /**
      * Start a thread that will call the `construct` method
      * and then exit.
      */
     init {
-        //        println("SwingWorker.SwingWorker")
-
         val doFinished = Runnable {
-            //            println("SwingWorker.run1")
             finished()
         }
 
         val doConstruct = Runnable {
-            //            println("SwingWorker.run2")
-
             try {
                 value = construct()
             } finally {
