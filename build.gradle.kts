@@ -12,7 +12,7 @@ plugins {
     application
     id("com.github.ben-manes.versions") version "0.52.0"
     id("com.dorongold.task-tree") version "4.0.0"
-    kotlin("jvm") version "2.1.20-Beta2"
+    kotlin("jvm") version "2.1.20-RC"
 }
 
 repositories {
